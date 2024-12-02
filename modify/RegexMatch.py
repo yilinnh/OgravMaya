@@ -106,64 +106,76 @@ def handle_text_change(*args):
     if ', ' in text and not text.startswith(', '):
         global pattern, replacement
 
-        formated_text = text.split(', ')
-        pattern = formated_text[0]
-        replacement = formated_text[1]
+        splited_text = text.split(', ')
+        pattern = splited_text[0]
+        replacement = splited_text[1]
 
         # if replacement:
             # cmds.paneLayout(pane, e=True, cn="vertical2")
 
-        if not haldle_incomplete_input(pattern) or not pattern:
+        if not omit_incomplete_input(pattern) or not pattern:
             return
 
         global matched_names, results
-        matched_names = []
-        results = []
 
-        for i in all_objs:
-            matched_obj = re.search(pattern, i)
-            if matched_obj:
-                matched_names.append(i)
+        matched_names = [i for i in all_objs if re.search(pattern, i)]
 
         cmds.textScrollList(match_list, e=True, ra=True)
         cmds.textScrollList(result_list, e=True, ra=True)
 
         cmds.textScrollList(match_list, e=True, a=matched_names)
 
-        if not haldle_incomplete_input(replacement) or not replacement:
+        if not omit_incomplete_input(replacement) or not replacement:
             return
 
-        for m in matched_names:
-            results.append(re.sub(pattern, replacement, m))
+        results = [re.sub(pattern, replacement, i) for i in matched_names]
+        results = sort_duplicated_results(results)
 
         cmds.paneLayout(pane, e=True, cn="vertical2")
         cmds.textScrollList(result_list, e=True, a=results)
 
     else:
-        if not haldle_incomplete_input(text):
+        if not omit_incomplete_input(text):
             return
 
-        matched_names = []
-        for i in all_objs:
-            matched_obj = re.search(text, i)
-            if matched_obj:
-                matched_names.append(i)
+        matched_names = [i for i in all_objs if re.search(text, i)] 
 
         cmds.textScrollList(match_list, e=True, ra=True)
         cmds.textScrollList(result_list, e=True, ra=True)
         cmds.textScrollList(match_list, e=True, a=matched_names)
 
 
-def haldle_incomplete_input(input):
-    if input.endswith('\\'):
-        return 
+def sort_duplicated_results(result_list):
+    counts = {}
+    sorted_results = []
 
-    if [i for i in wrapped_symbol_list if i in input]:
+    for i in result_list:
+        if i not in counts:
+            counts[i] = 1 # initialize the first item
+            sorted_results.append(f"{i}")
+        else:
+            if counts[i] == 1:
+                sorted_results[sorted_results.index(i)] = f"{i}1"
+
+            counts[i] += 1
+            sorted_results.append(f"{i}{counts[i]}")
+    
+    return sorted_results
+
+
+def omit_incomplete_input(input_text):
+    if input_text.startswith(('*', '+', '?')):
         return
 
-    typed_symbols = set(input) & set(symbol_dict)
+    if input_text.endswith('\\'):
+        return 
+
+    if [i for i in wrapped_symbol_list if i in input_text]:
+        return
+
+    typed_symbols = set(input_text) & set(symbol_dict)
     for i in typed_symbols:
-        if input.count(i) != input.count(symbol_dict[i]):
+        if input_text.count(i) != input_text.count(symbol_dict[i]):
             return 
 
     return True
@@ -191,4 +203,4 @@ def handle_apply(*args):
     cmds.textScrollList(result_list, e=True, si=results)
     cmds.select(results)
         
-# main()
+main()

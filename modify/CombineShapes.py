@@ -16,16 +16,16 @@ def main():
     if not target_transform:
         target_transform = cmds.group(n="newCurve", empty=True)
     
-    for s in sel:
+    for i in sel:
         # Get all shape nodes under the selected transform
-        shapes = cmds.listRelatives(s, ad=True, shapes=True, fullPath=True) or []
+        shapes = cmds.listRelatives(i, ad=True, shapes=True, fullPath=True) or []
         
         for shape in shapes:
             # Parent the shape under the target transform
             cmds.parent(shape, target_transform, shape=True, relative=True)
         
         # Delete the empty sel transform
-        cmds.delete(s)
+        cmds.delete(i)
     
     cmds.xform(target_transform, centerPivots=True)
     cmds.select(target_transform)
