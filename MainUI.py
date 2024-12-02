@@ -77,7 +77,7 @@ def create_panels():
         edit_ofst_form_layout(f_ofst_form, f_scroll)
 
         cmds.setParent(f_col.column_path)
-        cmds.text(l="Selection")
+        cmds.text(l="Select")
         Script(type, "SetSelector").create_btn_with_submenu()
         Script(type, "SelectionFilter").create_btn_with_submenu()
         Script(type, "SoftSelection").create_btn()
@@ -121,11 +121,15 @@ def create_panels():
         edit_ofst_form_layout(t_ofst_form, t_scroll)
 
         cmds.setParent(t_col.column_path)
-        cmds.text(l="Creation")
-        Script(type, "BatchControlCreation").create_btn()
-        Script(type, "BatchOffsetGroupCreation").create_btn()
-        Script(type, "BatchConstriantCreation").create_btn_with_submenu()
-        Script(type, "ControlConstraintOffsetCreation").create_btn()
+        cmds.text(l="Skeleton")
+        Script(type, "OrientEndJoints").create_btn()
+        Script(type, "MatchTransToRotAxis").create_btn()
+
+        cmds.text(l="Create")
+        Script(type, "BatchCreateControl").create_btn()
+        Script(type, "BatchCreateOffsetGroup").create_btn()
+        Script(type, "BatchCreateConstriant").create_btn_with_submenu()
+        Script(type, "BatchControlConstraintOffset").create_btn()
 
     create_display_panel()
     create_modify_panel()
