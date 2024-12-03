@@ -191,7 +191,6 @@ def handle_apply(*args):
         name_dict = {}
         for m,r in zip(matched_names, results):
             name_dict[m] = r
-        print(name_dict)
         for i in sel:
             cmds.rename(i, name_dict[i])
 
@@ -203,4 +202,4 @@ def handle_apply(*args):
     cmds.textScrollList(result_list, e=True, si=results)
     cmds.select(results)
         
-main()
+# main()
