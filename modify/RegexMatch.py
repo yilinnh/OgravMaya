@@ -3,9 +3,10 @@ import re
 
 def main():
     create_ui()
-    global symbol_dict, wrapped_symbol_list
-    symbol_dict = {'(':')', ')':'(', '[':']', ']':'[', '{':'}', '}':'{'}
-    wrapped_symbol_list = ['()', '[]', '{}', '(\)', '[\]', '{\}']
+    global repetition_symbols, pair_symbol_dict, wrapped_symbols
+    repetition_symbols = ('*', '+', '?')
+    pair_symbol_dict = {'(':')', ')':'(', '[':']', ']':'[', '{':'}', '}':'{'}
+    wrapped_symbols = ('()', '[]', '{}', '(\)', '[\]', '(*)', '[*]', '(+)', '[+]')
 
 def create_ui():
     global win, win_w, win_h
@@ -118,6 +119,8 @@ def handle_text_change(*args):
 
         global matched_names, results
 
+
+
         matched_names = [i for i in all_objs if re.search(pattern, i)]
 
         cmds.textScrollList(match_list, e=True, ra=True)
@@ -164,18 +167,18 @@ def sort_duplicated_results(result_list):
 
 
 def omit_incomplete_input(input_text):
-    if input_text.startswith(('*', '+', '?')):
+    if input_text.startswith(repetition_symbols) or input_text.endswith('\\') or [i for i in wrapped_symbols if i in input_text]:
         return
 
-    if input_text.endswith('\\'):
-        return 
+    # if input_text.endswith('\\'):
+    #     return 
 
-    if [i for i in wrapped_symbol_list if i in input_text]:
-        return
+    # if [i for i in wrapped_symbols if i in input_text]:
+    #     return
 
-    typed_symbols = set(input_text) & set(symbol_dict)
+    typed_symbols = set(input_text) & set(pair_symbol_dict)
     for i in typed_symbols:
-        if input_text.count(i) != input_text.count(symbol_dict[i]):
+        if input_text.count(i) != input_text.count(pair_symbol_dict[i]):
             return 
 
     return True
