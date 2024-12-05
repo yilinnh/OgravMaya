@@ -111,6 +111,10 @@ def create_panels():
         Script(type, "AscendHierarchyLevel").create_btn()
         Script(type, "CombineShapes").create_btn()
 
+        cmds.text(l="Misc")
+        Script(type, "AutoTumblePivot").create_btn()
+        Script(type, "CommandPort").create_btn()
+
 
     def create_rigging_panel(type="rigging"):
         global t_ofst_form, t_scroll, t_col
@@ -124,6 +128,7 @@ def create_panels():
         cmds.text(l="Skeleton")
         Script(type, "OrientEndJoints").create_btn()
         Script(type, "MatchTransToRotAxis").create_btn()
+        Script(type, "RenameJoints").create_btn()
 
         cmds.text(l="Create")
         Script(type, "BatchCreateControl").create_btn()

@@ -45,21 +45,23 @@ def create_ui():
     # COLOR PALETTE
     f_color_palette_row = create_row_column_layout(7, win_w/8, 2, main_form, h=22)
 
-    ColorCanvas((0.8,0,0)) # red
+    ColorCanvas((0.6,0,0)) # red
+    ColorCanvas((0.8,0.1,0.1)) # light red
+    ColorCanvas((0.8,0.2,0.2)) # light pink
+    # ColorCanvas((0.5,0.5,1)) # light pink
     ColorCanvas((0.9,0.4,0.2)) # orange
     ColorCanvas((0.9,0.9,0)) # yellow
+    ColorCanvas((0.6,0.9,0.6)) # light green
     ColorCanvas((0.5,0.8,0.2)) # green
-    ColorCanvas((0.2,0.5,1)) # blue
-    ColorCanvas((0.4,0.2,1)) # purple
-    ColorCanvas((0.0,0.0,1)) # dark blue
     s_color_palette_row = create_row_column_layout(7, win_w/8, 2, main_form, h=22)
-    ColorCanvas((0.9,0.3,0.5)) # pink
-    ColorCanvas((0.9,0.5,0.8)) # light pink
-    ColorCanvas((0.7,0.9,0.5)) # light green
-    ColorCanvas((0,0.8,1)) # cyan
-    ColorCanvas((0.8,0.8,1)) 
-    ColorCanvas((0.6,0.6,0.8)) 
-    ColorCanvas((0.0,0.0,0.2))
+    # ColorCanvas((0.9,0.5,0.8)) # light pink
+    ColorCanvas((0.0,0.0,1)) # dark blue
+    ColorCanvas((0,0.6,1)) # light blue
+    ColorCanvas((0.2,0.6,1)) # blue
+    ColorCanvas((0.6,0.6,0.8))
+    ColorCanvas((0.5,0.5,1)) 
+    ColorCanvas((0.4,0.2,1)) # purple
+    ColorCanvas((0.6,0.1,1)) # purple
     # ColorCanvas((0.0,0.1,0.0))
     # ColorCanvas((0.1,0.0,0.0))
 

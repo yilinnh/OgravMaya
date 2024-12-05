@@ -1,11 +1,11 @@
 import maya.cmds as cmds
 
 class CheckBox:
-    def __init__(self, short_name, label=""):
-        if not label:
-            label = short_name
+    def __init__(self, short_name, label):
+        # if not label:
+        #     label = short_name
         self.type = short_name
-        cmds.checkBox(short_name, l=label.capitalize(), value=False, onCommand=self.on_command, offCommand=self.off_command)
+        cmds.checkBox(short_name, l=label, value=False, onCommand=self.on_command, offCommand=self.off_command)
 
     def on_command(self, *args):
         checked_types.append(self.type)
@@ -16,13 +16,13 @@ class CheckBox:
 def main():
     global window
     global checked_types
-    window = "SelectionFilter"
+    window = 'SelectionFilter'
     checked_types = []
 
     if cmds.window(window, ex=True):
         cmds.deleteUI(window)
 
-    cmds.window(window, t="Selection Filter", mnb=0, mxb=0, s=0, wh=(203,170))
+    cmds.window(window, t='Selection Filter', mnb=0, mxb=0, s=0, wh=(203,170))
     cmds.showWindow(window)
 
     # cmds.rowColumnLayout(adj=True)
@@ -31,22 +31,22 @@ def main():
     cmds.formLayout(base_form, e=True, af=[(main_form,'top',10), (main_form,'right',10), (main_form,'bottom',10), (main_form,'left',10)])
 
     # header_row = cmds.rowColumnLayout(p=main_form)
-    header_text = cmds.text(l="Choose filter types:", p=main_form)
+    header_text = cmds.text(l='Choose filter types:', p=main_form)
     content_grid = cmds.gridLayout(nc=2, cw=90, ch=20, p=main_form)
-    CheckBox("transform")
-    CheckBox("shape")
-    CheckBox("mesh")
-    CheckBox("nurbsCurve", "NURBS Curve")
-    CheckBox("clusterHandle", "cluster")
-    CheckBox("joint")
-    CheckBox("constraint")
+    CheckBox('transform', 'Transform')
+    CheckBox('shape', "Shape")
+    CheckBox('mesh', 'Mesh')
+    CheckBox('nurbsCurve', 'NURBS')
+    CheckBox('clusterHandle', 'Cluster')
+    CheckBox('joint', 'Joint')
+    CheckBox('constraint', 'Constraint')
 
     footer_row = cmds.rowColumnLayout(nc=2, cs=[(1,0),(2,10)], cw=[(1,85),(2,85)], p=main_form)
-    cmds.button(l="Apply", command=on_apply, p=footer_row)
-    cmds.button(l="Close", command=close_window, p=footer_row)
+    cmds.button(l='Apply', command=on_apply, p=footer_row)
+    cmds.button(l='Close', command=close_window, p=footer_row)
 
     cmds.formLayout(main_form, edit=True, 
-                    af=[(content_grid,'left',4), (footer_row,'bottom',0)],
+                    af=[(header_text,'left',4), (content_grid,'left',8), (footer_row,'bottom',0)],
                     ac=[(content_grid,'top',8,header_text)])
 
 
@@ -61,12 +61,12 @@ def on_apply(*args):
     global checked_types
 
     filtered_sel = []
-    nested_node = ["nurbsCurve", "clusterHandle"]
+    nested_node = ['nurbsCurve', 'clusterHandle']
     checked_nested_nodes = set(nested_node) & set(checked_types)
     
     if checked_nested_nodes:
         # list selectoin from both viewport and outliner
-        transform_sel = cmds.ls(sel, type="transform")
+        transform_sel = cmds.ls(sel, type='transform')
 
         if transform_sel:
             for i in transform_sel:
@@ -85,7 +85,7 @@ def on_apply(*args):
     cmds.select(set(filtered_sel), replace=True)
 
 def close_window(*args):
-    cmds.deleteUI("SelectionFilter")
+    cmds.deleteUI('SelectionFilter')
     checked_types.clear()
 
 # main()
