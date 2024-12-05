@@ -44,9 +44,6 @@ def create_ui():
     cmds.formLayout(main_form, e=True, ac=[(pane,'top',0,input_row)])
 
 
-    # cmds.dockControl(l='Regex Match', area='right', content=win, allowedArea='all', splitLayout='vertical')
-
-
 def create_row_column_layout(num_of_col, col_width, col_spacing, parent, **kwargs):
     cw = []
     cs = []
@@ -66,13 +63,14 @@ def two_cols_layout(**kwargs):
 
 def handle_match_sel(*args):
     selected_items = cmds.textScrollList(match_list, q=True, selectItem=True)
-    query_exist_sel(match_list, selected_items)
+    select_list_item(match_list, selected_items)
 
 def handle_result_sel(*args):
     selected_items = cmds.textScrollList(result_list, q=True, selectItem=True)
-    query_exist_sel(result_list, selected_items)
+    select_list_item(result_list, selected_items)
 
-def query_exist_sel(list, selected_items):
+
+def select_list_item(list, selected_items):
     all_objs = cmds.ls(dag=True)
     exist_sel = set(selected_items) & set(all_objs)
     if not exist_sel:
@@ -120,18 +118,19 @@ def handle_text_change(*args):
         global matched_names, results
 
 
-
+        # this will get the full path name
         matched_names = [i for i in all_objs if re.search(pattern, i)]
 
         cmds.textScrollList(match_list, e=True, ra=True)
         cmds.textScrollList(result_list, e=True, ra=True)
 
-        cmds.textScrollList(match_list, e=True, a=matched_names)
+        # output shortName instead of longName/full path name
+        cmds.textScrollList(match_list, e=True, a=get_short_name(matched_names))
 
         if not omit_incomplete_input(replacement) or not replacement:
             return
 
-        results = [re.sub(pattern, replacement, i) for i in matched_names]
+        results = [re.sub(pattern, replacement, i) for i in get_short_name(matched_names)]
         results = sort_duplicated_results(results)
 
         cmds.paneLayout(pane, e=True, cn="vertical2")
@@ -145,14 +144,15 @@ def handle_text_change(*args):
 
         cmds.textScrollList(match_list, e=True, ra=True)
         cmds.textScrollList(result_list, e=True, ra=True)
-        cmds.textScrollList(match_list, e=True, a=matched_names)
+        cmds.textScrollList(match_list, e=True, a=get_short_name(matched_names))
 
 
-def sort_duplicated_results(result_list):
+# append count numbers for the same names
+def sort_duplicated_results(results):
     counts = {}
     sorted_results = []
 
-    for i in result_list:
+    for i in results:
         if i not in counts:
             counts[i] = 1 # initialize the first item
             sorted_results.append(f"{i}")
@@ -184,18 +184,34 @@ def omit_incomplete_input(input_text):
     return True
 
 
+def get_short_name(name_list):
+    short_name_list = []
+    for i in name_list:
+        if '|' in i:
+            splited_long_name =i.split('|')
+            short_name_list.append(splited_long_name[-1])
+        else:
+            short_name_list.append(i)
+    
+    return short_name_list
+
+
 def handle_apply(*args):
     if not cmds.textField(input_field, q=True, text=True):
         return
 
+    print(f'matched_names: {matched_names}')
+    print(f'results: {results}')
+
     # only apply the replacement to selection
-    sel = cmds.ls(sl=True)
-    if sel:
-        name_dict = {}
-        for m,r in zip(matched_names, results):
-            name_dict[m] = r
-        for i in sel:
+    if all_objs:
+        name_dict = {n:r for n,r in zip(matched_names, results)}
+        # reverse the order to rename the objs from the lowest level to the top level, to prevent not able to find the obj after the fore path is renamed
+        name_dict = {key:value for key,value in reversed(name_dict.items())}
+        for i in name_dict:
             cmds.rename(i, name_dict[i])
+        # for i in all_objs:
+        #     cmds.rename(i, name_dict[i])
 
     # apply the replacement to all objects
     else:
@@ -205,4 +221,4 @@ def handle_apply(*args):
     cmds.textScrollList(result_list, e=True, si=results)
     cmds.select(results)
         
-# main()
+main()
