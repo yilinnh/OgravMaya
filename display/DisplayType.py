@@ -17,73 +17,44 @@ def main():
     if cmds.window(window, ex=True):
         cmds.deleteUI(window)
 
-    win_w = 264
+    win_w = 270
     win_h = 104
-    cmds.window(window, t="Display Type", wh=(win_w,win_h), s=0, mnb=0, mxb=0)
+    cmds.window(window, t="Display Type", wh=(win_w,win_h), mnb=False, mxb=False, s=False)
     cmds.showWindow(window)
 
     base_form = cmds.formLayout(p=window)
-    main_form = cmds.formLayout(p=base_form)
-    cmds.formLayout(base_form, e=True, af=[(main_form,"top",10), (main_form,"right",10), (main_form,"bottom",10), (main_form,"left",10)])
+    ofst_form = cmds.formLayout(p=base_form)
+    cmds.formLayout(base_form, e=True, af=[(ofst_form,"top",10), (ofst_form,"right",10), (ofst_form,"bottom",10), (ofst_form,"left",10)])
 
-    f_row = create_row_column_layout(3, win_w/3-4, 0, main_form)
+    f_row = create_row_column_layout(3, 80, 0, ofst_form)
     cmds.radioCollection()
     RadioBtn(0)
     RadioBtn(1)
     RadioBtn(2)
-    cmds.rowColumnLayout(f_row, edit=True, cw=[(1,72)])
+    cmds.rowColumnLayout(f_row, edit=True, cw=[(1,70)])
 
     global vis_check, vis_value
-    s_row = create_row_column_layout(1, win_w-23, 0, main_form)
+    s_row = cmds.rowColumnLayout(p=ofst_form)
     vis_check = cmds.checkBox(l="Visibility", v=1, cc=on_checkbox)
     vis_value = cmds.checkBox(vis_check, q=True, v=True)
 
 
-    bottom_row = create_row_column_layout(2, win_w/2-15, 8, main_form)
-    cmds.button(l="Apply", command=handle_apply)
-    cmds.button(l="Close", command=handle_close)
+    # footer_form = create_row_column_layout(2, win_w/2-15, 8, ofst_form)
+    footer_form = cmds.formLayout(p=ofst_form)
+    apply_btn = cmds.button(l="Apply", command=handle_apply)
+    close_btn = cmds.button(l="Close", command=handle_close)
 
-    cmds.formLayout(main_form, e=True, 
-                    af=[(f_row,"left",4), (s_row,"left",4), (bottom_row,"bottom",0)], 
+    two_col_form(footer_form, apply_btn, close_btn)
+
+    cmds.formLayout(ofst_form, e=True, 
+                    af=[(f_row,"left",4), (s_row,"left",4), (footer_form,"bottom",0), (footer_form,'left',0), (footer_form,'right',0)], 
                     ac=[(s_row,"top",4,f_row)])
 
-    # create_set()
     initialize_sets()
 
 
-
-# def create_set():
-#     global root_set, display_sets, tem_set, ref_set, vis_set
-#     root_set = "displayTypeSet"
-#     display_sets = ["T", "R", "H"]
-#     tem_set, ref_set, vis_set = display_sets
-#     initialize_sets()
-
-
-def initialize_sets():
-    global root_set, display_sets, tem_set, ref_set, vis_set
-    root_set = "displayTypeSet"
-    selector_set = "selectionSet"
-    display_sets = ["T", "R", "H"]
-    tem_set, ref_set, vis_set = display_sets
-    all_sets = cmds.listSets(allSets=True)
-
-    if selector_set in all_sets:
-        for i in display_sets:
-            if i not in all_sets:
-                cmds.sets(n=i, empty=True)
-                cmds.sets(i, e=True, forceElement=selector_set)
-    elif root_set in all_sets:
-        for i in display_sets:
-            if i not in all_sets:
-                cmds.sets(n=i, empty=True)
-                cmds.sets(i, e=True, forceElement=root_set)
-    elif root_set not in all_sets:
-        cmds.sets(n=root_set, empty=True)
-        for i in display_sets:
-            if i not in all_sets:
-                cmds.sets(n=i, empty=True)
-                cmds.sets(i, e=True, forceElement=root_set)
+def two_col_form(form, l_col, r_col):
+    cmds.formLayout(form, e=True, af=[(l_col,'left',0), (r_col,'right',0)], ap=[ (l_col,'right',0,49), (r_col,'left',0,51)])
 
 
 def create_row_column_layout(num_of_col, col_width, col_spacing, parent):
@@ -100,6 +71,33 @@ def create_row_column_layout(num_of_col, col_width, col_spacing, parent):
     return cmds.rowColumnLayout(nc=num_of_col, cw=cw, cs=cs, p=parent)
 
 
+def initialize_sets():
+    global root_set, display_sets, tem_set, ref_set, vis_set
+    root_set = "displayTypeSet"
+    # selector_set = "selectionSet"
+    display_sets = ["T", "R", "H"]
+    tem_set, ref_set, vis_set = display_sets
+    all_sets = cmds.listSets(allSets=True)
+
+    # if selector_set in all_sets:
+    #     for i in display_sets:
+    #         if i not in all_sets:
+    #             cmds.sets(n=i, empty=True)
+    #             cmds.sets(i, e=True, forceElement=selector_set)
+    if root_set in all_sets:
+        for i in display_sets:
+            if i not in all_sets:
+                cmds.sets(n=i, empty=True)
+                cmds.sets(i, e=True, forceElement=root_set)
+    elif root_set not in all_sets:
+        cmds.sets(n=root_set, empty=True)
+        for i in display_sets:
+            if i not in all_sets:
+                cmds.sets(n=i, empty=True)
+                cmds.sets(i, e=True, forceElement=root_set)
+
+
+
 def on_checkbox(*args):
     global vis_value
     vis_value = cmds.checkBox(vis_check, q=True, v=True)
@@ -111,8 +109,6 @@ def handle_apply(*args):
     if not sel:
         print("No objects selected")
         return
-
-    # initialize_sets()
 
     for i in sel:
         cmds.setAttr(f"{i}.overrideEnabled", 1)

@@ -16,6 +16,7 @@ def main():
 
         # set the tranformation no matter the obj has offset poivot 
         cmds.xform(grp_name, matrix=sel_matrix)
+
         cmds.matchTransform(grp_name, i, pivots=True)
 
         cmds.parent(i, grp_name)

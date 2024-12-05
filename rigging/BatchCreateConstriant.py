@@ -32,7 +32,7 @@ def create_ui():
     main_form = cmds.formLayout(p=base_form)
     option_area = cmds.formLayout(p=main_form)
 
-    header = cmds.text(l="Constraint type:", p=main_form)
+    header = cmds.text(l="Constraint Type:", p=main_form)
 
     grid = cmds.gridLayout(nc=4, cw=60, p=option_area)
     cmds.radioCollection()
@@ -44,6 +44,7 @@ def create_ui():
     ofst_check = cmds.checkBox(l="Maintain Offset", v=1, changeCommand=on_ofst_check, p=option_area)
 
     list_title = two_cols_layout()
+
     cmds.text(l="Drivers")
     cmds.text(l="Drivens")
     list_sub_title = one_col_layout()
@@ -76,6 +77,15 @@ def create_ui():
                     ac=[(option_area,"top",4,header), (hr_list,"top",12,option_area), (list_title,"top",4,hr_list), (list_sub_title,"top",4,hr_list),(list_cols,"top",4,list_title), (load_btns,"top",8,list_cols), (hr_footer,"top",8,load_btns), (footer,"top",8,hr_footer)])
 
     cmds.formLayout(option_area, e=True, ac=[(ofst_check,"top",0,grid)])
+
+def one_col_form(form, col):
+    cmds.formLayout(form, e=True, af=[(col,'left',0), (col,'right',0)])
+
+def two_col_form(form, l_col, r_col):
+    cmds.formLayout(form, e=True, af=[(l_col,'left',0), (r_col,'right',0)], ap=[(l_col,'right',0,49), (r_col,'left',0,51)])
+
+def three_col_form(form, l_col, m_col, r_col):
+    cmds.formLayout(form, edit=True, af=[(l_col,'left',0), (r_col,'right',0)], ap=[(l_col,'right',0,33), (m_col,'left',0,34), (m_col,'right',0,66), (r_col,'left',0,67)])
 
 def two_cols_layout(**kwargs):
     return create_row_column_layout(2, win_w/2-14, 4, main_form, **kwargs)
@@ -173,4 +183,4 @@ def handle_delete(*args):
 def handle_close(*args):
     cmds.deleteUI("BatchConstrain")
 
-#main()
+# main()

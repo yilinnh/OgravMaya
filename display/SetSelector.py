@@ -3,19 +3,23 @@ import maya.cmds as cmds
 import maya.api.OpenMaya as om
 
 def main():
-    global root_set, new_set, previous_member_sel, common_title
-    root_set = "selectionSet"
-    new_set = None
+    initialize_module()
+    create_ui()
+    callback()
+
+
+def initialize_module():
+    global root_set, new_set, set_sel, previous_member_sel, common_title
+    root_set = 'selectionSet'
+    new_set = ''
+    set_sel = []
     previous_member_sel = []
-    common_title = "----- COMMON -----"
+    common_title = '----- COMMON -----'
 
     if root_set in cmds.ls(sets=True):
         print(f"{root_set} found")
     else:
         cmds.sets(n=root_set, empty=True)
-
-    create_ui()
-    callback()
 
 
 def reload_script():
@@ -28,7 +32,7 @@ def reload_script():
 
 def create_ui():
     global win
-    win = "setSelector"
+    win = 'setSelector'
 
     if cmds.window(win, ex=True):
         cmds.deleteUI(win)
@@ -36,17 +40,17 @@ def create_ui():
     global win_w
     global win_h
     win_w = 300
-    win_h = 240
-    cmds.window(win, t="Set Selector", mxb=False, mnb=False, wh=(win_w,win_h), s=False, closeCommand=remove_callbacks)
+    win_h = 220
+    cmds.window(win, t='Set Selector', mxb=False, mnb=False, wh=(win_w,win_h), s=False, closeCommand=remove_callbacks)
     cmds.showWindow(win)
 
     global base_form
-    global main_form
+    global ofst_form
     base_form = cmds.formLayout(p=win)
-    main_form = cmds.formLayout(p=base_form)
-    cmds.formLayout(base_form, e=True, af=[(main_form,"top",10), (main_form,"bottom",10), (main_form,"left",10), (main_form,"right",10), ])
+    ofst_form = cmds.formLayout(p=base_form)
+    cmds.formLayout(base_form, e=True, af=[(ofst_form,'top',10), (ofst_form,'bottom',10), (ofst_form,'left',10), (ofst_form,'right',10)])
 
-    pane_layout = cmds.paneLayout(cn="vertical2", h=win_h-81,  enableKeyboardFocus=False, p=main_form) # 115
+    pane_layout = cmds.paneLayout(cn='vertical2', enableKeyboardFocus=False, p=ofst_form) # 115
 
     global set_list
     global member_list
@@ -54,48 +58,58 @@ def create_ui():
     member_list = cmds.textScrollList(allowMultiSelection=True, enableKeyboardFocus=False, selectCommand=on_member_select, doubleClickCommand=on_double_click, p=pane_layout)
 
 
-    btn_bg = two_cols_layout()
-    cmds.rowColumnLayout(h=56, bgc=(0.24,0.24,0.24), p=btn_bg)
-    cmds.rowColumnLayout(h=56, bgc=(0.24,0.24,0.24), p=btn_bg)
+    btn_bg_form = cmds.formLayout(p=ofst_form)
+    l_bg = cmds.rowColumnLayout(h=55, bgc=(0.24,0.24,0.24), p=btn_bg_form)
+    r_bg = cmds.rowColumnLayout(h=55, bgc=(0.24,0.24,0.24), p=btn_bg_form)
+    two_col_form(btn_bg_form, l_bg, r_bg)
 
-    btn_title = two_cols_layout()
-    cmds.text(l="Set")
-    cmds.text(l="Member")
+    btn_title_form = cmds.formLayout(p=ofst_form)
+    l_title = cmds.text(l='Set')
+    r_title = cmds.text(l='Member')
+    two_col_form(btn_title_form, l_title, r_title)
 
-    btns = two_cols_layout()
+    btn_form = cmds.formLayout(p=ofst_form)
 
-    btn_w = win_w/4-16
-    set_row = cmds.rowColumnLayout(nc=2, cw=[(1,btn_w),(2,btn_w)], cs=[(1,5),(2,6)], p=btns)
-    cmds.button(l="Create", command=handle_create_sets)
-    cmds.button(l="Delete", command=handle_delete_sets)
+    set_form = cmds.formLayout(p=btn_form)
+    create_btn = cmds.button(l='Create', command=handle_create_sets)
+    delete_btn = cmds.button(l='Delete', command=handle_delete_sets)
+    two_col_form(set_form, create_btn, delete_btn)
 
-    member_row = cmds.rowColumnLayout(nc=2, cw=[(1,btn_w),(2,btn_w)], cs=[(1,5),(2,6)], p=btns)
-    cmds.button(l="Add", command=handle_add_members)
-    cmds.button(l="Remove", command=handle_remove_members)
+    # member_row = cmds.rowColumnLayout(nc=2, cw=[(1,btn_w),(2,btn_w)], cs=[(1,5),(2,6)], p=btns)
+    member_form = cmds.formLayout(p=btn_form)
+    add_btn = cmds.button(l='Add', command=handle_add_members)
+    remove_btn = cmds.button(l='Remove', command=handle_remove_members)
+    two_col_form(member_form, add_btn, remove_btn)
 
+    cmds.formLayout(btn_form, e=True, 
+                    ap=[(set_form,'left',0,2),
+                        (set_form,'right',0,47),
+                        (member_form,'left',0,53),
+                        (member_form,'right',0,98)
+                    ])
 
-    cmds.formLayout(main_form, e=True, 
-                    af=[(pane_layout,"left",0), (pane_layout,"right",0)], 
-                    ac=[(btn_title,"top",10,pane_layout), (btn_bg,"top",5,pane_layout), (btns,"top",30,pane_layout)]) 
+    cmds.formLayout(ofst_form, e=True, 
+                    af=[(pane_layout,'left',0), 
+                        (pane_layout,'right',0),
+                        (pane_layout,'top',0),
+                        (pane_layout,'bottom',60),
+                        (btn_bg_form,'left',0),
+                        (btn_bg_form,'right',0),
+                        (btn_title_form,'left',0),
+                        (btn_title_form,'right',0),
+                        (btn_form,'left',0),
+                        (btn_form,'right',0),
+                        (btn_bg_form,'bottom',0),
+                        (btn_title_form,'bottom',35),
+                        (btn_form,'bottom',5),
+                    ])
 
     # cmds.dockControl(l='Set Selector', area='right', content=win, allowedArea='all', splitLayout='vertical')
 
     update_set_items()
 
-
-def two_cols_layout(**kwargs):
-    return create_row_column_layout(2, win_w/2-14, 9, main_form, **kwargs)
-
-def create_row_column_layout(num_of_col, col_width, col_spacing, parent, **kwargs):
-    cw = []
-    cs = []
-    for i in range(num_of_col):
-        cw.append((i+1, col_width))
-        if i == 0:
-            cs.append((i+1, 0)) 
-        else:
-            cs.append((i+1, col_spacing)) 
-    return cmds.rowColumnLayout(nc=num_of_col, cw=cw, cs=cs, p=parent, **kwargs)
+def two_col_form(form, l_col, r_col):
+    cmds.formLayout(form, e=True, af=[(l_col,'left',0), (r_col,'right',0)], ap=[(l_col,'right',0,49), (r_col,'left',0,51)])
 
 # ---------------- textScrollList events ----------------
 
@@ -134,7 +148,7 @@ def update_set_items(*args):
         sub_sets = cmds.sets(root_set, q=True)
         if sub_sets:
             ex_sub_sets = set(sub_sets) & set(all_sets)
-        # print("selectionSet Found")
+        # print('selectionSet Found')
             if ex_sub_sets:
                 # remove_all_items(set_list)
                 append_items(set_list, sorted(ex_sub_sets))
@@ -183,8 +197,8 @@ def select_previous_set_items():
         ex_set_sel = set(set_sel) & set(all_sets)
         cmds.textScrollList(set_list, e=True, deselectAll=True)
         select_items(set_list, ex_set_sel)
-        # print(f"set_sel: {set_sel}")
-        # print(f"ex_set_sel: {ex_set_sel}")
+    else: 
+        return
     
 
 # Apply the set selection to the scene, and show the members in the right pane
@@ -225,7 +239,7 @@ def on_member_select(*args):
         cmds.select(member_sel, replace=True)
         previous_member_sel = member_sel
 
-        print("select " + ", ".join(member_sel))
+        print('select ' + ', '.join(member_sel))
 
 
 # Rename the item
@@ -236,16 +250,16 @@ def on_double_click():
         current_name = cmds.ls(set_sel, sn=True)[0]
 
     result = cmds.promptDialog(
-        title="Rename",
+        title='Rename',
         text=f"{current_name}",
-        message="Enter Name:",
-        button={"OK","Cancel"},
-        cancelButton="Cancel",
-        dismissString="Cancel",
-        defaultButton="OK"
+        message='Enter Name:',
+        button={'OK','Cancel'},
+        cancelButton='Cancel',
+        dismissString='Cancel',
+        defaultButton='OK'
     )
 
-    if result == "OK":
+    if result == 'OK':
         text = cmds.promptDialog(q=True, text=True)
 
         update_set_sel()        
@@ -265,7 +279,7 @@ def on_double_click():
                 update_set_sel()
 
             else:
-                print("No objects found")
+                print('No objects found')
 
 
 # ---------------- button events ----------------
@@ -278,13 +292,13 @@ def handle_create_sets(*args):
     global new_set
 
     if root_set not in all_sets:
-        new_set = cmds.sets(n="set1", empty=True)
+        new_set = cmds.sets(n='set1', empty=True)
         cmds.sets(n=root_set, empty=True)
-        cmds.sets("set1", e=True, forceElement=root_set)
+        cmds.sets('set1', e=True, forceElement=root_set)
 
     elif set_items is None:
-        new_set = cmds.sets(n="set1", empty=True)
-        cmds.sets("set1", e=True, forceElement=root_set)
+        new_set = cmds.sets(n='set1', empty=True)
+        cmds.sets('set1', e=True, forceElement=root_set)
 
     else:
         set_item_count = len(set_items)
@@ -333,10 +347,10 @@ def callback():
     callback_ids.append(om.MSceneMessage.addCallback(om.MSceneMessage.kAfterNew, on_scene_event))
     callback_ids.append(om.MSceneMessage.addCallback(om.MSceneMessage.kAfterOpen, on_scene_event))
 
-    callback_ids.append(om.MDGMessage.addNodeAddedCallback(added_callback, "dependNode"))
-    callback_ids.append(om.MDGMessage.addNodeRemovedCallback(removed_callback, "dependNode"))
-    callback_ids.append(om.MEventMessage.addEventCallback("Undo", undo_callback))
-    callback_ids.append(om.MEventMessage.addEventCallback("Redo", redo_callback))
+    callback_ids.append(om.MDGMessage.addNodeAddedCallback(added_callback, 'dependNode'))
+    callback_ids.append(om.MDGMessage.addNodeRemovedCallback(removed_callback, 'dependNode'))
+    callback_ids.append(om.MEventMessage.addEventCallback('Undo', undo_callback))
+    callback_ids.append(om.MEventMessage.addEventCallback('Redo', redo_callback))
 
     global abort_added_callback, abort_removed_callback
     abort_added_callback = False

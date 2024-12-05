@@ -20,41 +20,63 @@ def create_ui():
     cmds.window(win, t='Batch Match', wh=(win_w,win_h), mxb=False, mnb=False, s=False, cc=cleanup_callback)
     cmds.showWindow(win)
 
-    global main_form
+    global ofst_form
     base_form = cmds.formLayout()
-    main_form = cmds.formLayout(p=base_form)
+    ofst_form = cmds.formLayout(p=base_form)
 
-    cmds.formLayout(base_form, e=True, af=[(main_form,'top',10),(main_form,'right',10),(main_form,'bottom',10),(main_form,'left',11)])
+    cmds.formLayout(base_form, e=True, af=[(ofst_form,'top',10),(ofst_form,'right',10),(ofst_form,'bottom',10),(ofst_form,'left',10)])
 
-    list_titles = two_cols_layout()
-    cmds.text(l='From')
-    cmds.text(l='To')
-    list_sub_title = one_col_layout()
-    cmds.text(l='>')
+    list_title_form = cmds.formLayout(p=ofst_form)
+    from_title = cmds.text(l='From')
+    to_title = cmds.text(l='To')
+    two_col_form(list_title_form, from_title, to_title)
 
-    list_cols = two_cols_layout(h=100)
+    list_sub_title_form = cmds.formLayout(p=ofst_form)
+    sub_title = cmds.text(l='>')
+    one_col_form(list_sub_title_form, sub_title)
+
+    list_form = cmds.formLayout(p=ofst_form)
     global from_list
     global to_list
-    from_list = cmds.textScrollList(p=list_cols, enableKeyboardFocus=False, allowMultiSelection=True)
-    to_list = cmds.textScrollList(p=list_cols, enableKeyboardFocus=False, allowMultiSelection=True)
+    from_list = cmds.textScrollList(p=list_form, enableKeyboardFocus=False, allowMultiSelection=True, h=win_h-110)
+    to_list = cmds.textScrollList(p=list_form, enableKeyboardFocus=False, allowMultiSelection=True, h=win_h-110)
+    two_col_form(list_form, from_list, to_list)
 
-    btns_row = cmds.rowColumnLayout(nc=5,cw=[(1,93),(2,25),(3,25),(4,25),(5,50)], cs=[(1,0),(2,4),(3,0),(4,0),(5,4)], p=main_form)
+    btns_row = cmds.rowColumnLayout(nc=5,cw=[(1,95),(2,25),(3,25),(4,25),(5,50)], cs=[(1,0),(2,4),(3,0),(4,0),(5,4)], p=ofst_form)
     cmds.button(l='All Transforms', c=match_transforms)
     cmds.button(l='T', c=partial(match_transforms, pos=True))
     cmds.button(l='R', c=partial(match_transforms, rot=True))
     cmds.button(l='S', c=partial(match_transforms, scl=True))
     cmds.button(l='Pivots', c=partial(match_transforms, piv=True))
 
-    parent_btn_row = one_col_layout()
-    cmds.button(l='Parent', c=parent_objs)
-    # cmds.text(l='')
-    # cmds.text(l='')
+    footer_form = cmds.formLayout(p=ofst_form)
+    parent_btn = cmds.button(l='Parent', c=parent_objs)
+    one_col_form(footer_form, parent_btn)
 
-    cmds.formLayout(main_form, e=True, 
-                    af=[list_titles,'top',0],
-                    ac=[(list_cols,'top',4,list_titles), (btns_row,'top',12,list_cols), (parent_btn_row,'top',4,btns_row)])
+    cmds.formLayout(ofst_form, e=True, 
+                    af=[(list_title_form,'top',0),
+                        (list_title_form,'left',0),
+                        (list_title_form,'right',0),
+                        (list_sub_title_form,'left',0),
+                        (list_sub_title_form,'right',0),
+                        (footer_form,'left',0),
+                        (footer_form,'right',0),
+                        (list_form,'left',0),
+                        (list_form,'right',0)
+                    ],
+                    ac=[(list_form,'top',4,list_title_form), (btns_row,'top',12,list_form), (footer_form,'top',4,btns_row)])
 
     update_sel_callback()
+
+
+def one_col_form(form, col):
+    cmds.formLayout(form, e=True, af=[(col,'left',0), (col,'right',0)])
+
+def two_col_form(form, l_col, r_col):
+    cmds.formLayout(form, e=True, af=[(l_col,'left',0), (r_col,'right',0)], ap=[ (l_col,'right',0,49), (r_col,'left',0,51)])
+
+def three_col_form(form, l_col, m_col, r_col):
+    cmds.formLayout(form, edit=True, af=[(l_col,'left',0), (r_col,'right',0)], ap=[(l_col,'right',0,33), (m_col,'left',0,34), (m_col,'right',0,66), (r_col,'left',0,67)])
 
 
 def create_row_column_layout(num_of_col, col_width, col_spacing, parent, **kwargs):
@@ -67,15 +89,6 @@ def create_row_column_layout(num_of_col, col_width, col_spacing, parent, **kwarg
         else:    
             cs.append((i+1, col_spacing)) 
     return cmds.rowColumnLayout(nc=num_of_col, cw=cw, cs=cs, p=parent, adj=True, **kwargs)
-
-def one_col_layout(**kwargs):
-    return create_row_column_layout(1, win_w-23, 0, main_form, **kwargs)
-
-def two_cols_layout(**kwargs):
-    return create_row_column_layout(2, win_w/2-14, 4, main_form, **kwargs)
-
-def three_cols_layout(**kwargs):
-    return create_row_column_layout(3, win_w/3-11, 5, main_form, **kwargs)
 
 
 def match_transforms(*args, **kwargs):

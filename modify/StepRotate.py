@@ -11,7 +11,7 @@ def main():
         dismissString='Cancel'
     )
     
-    if axis == 'OK' or axis == 'Cancel':
+    if axis == 'OK':
 
         sel = cmds.ls(sl=True, type='transform')
         if not sel:

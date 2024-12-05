@@ -22,17 +22,17 @@ def main():
     if cmds.window(window, ex=True):
         cmds.deleteUI(window)
 
-    cmds.window(window, t='Selection Filter', mnb=0, mxb=0, s=0, wh=(203,170))
+    cmds.window(window, t='Selection Filter', wh=(210,170), mnb=False, mxb=False, s=False)
     cmds.showWindow(window)
 
     # cmds.rowColumnLayout(adj=True)
     base_form = cmds.formLayout()
-    main_form = cmds.formLayout(nd=100)
-    cmds.formLayout(base_form, e=True, af=[(main_form,'top',10), (main_form,'right',10), (main_form,'bottom',10), (main_form,'left',10)])
+    ofst_form = cmds.formLayout(nd=100)
+    cmds.formLayout(base_form, e=True, af=[(ofst_form,'top',10), (ofst_form,'right',10), (ofst_form,'bottom',10), (ofst_form,'left',10)])
 
-    # header_row = cmds.rowColumnLayout(p=main_form)
-    header_text = cmds.text(l='Choose filter types:', p=main_form)
-    content_grid = cmds.gridLayout(nc=2, cw=90, ch=20, p=main_form)
+    # header_row = cmds.rowColumnLayout(p=ofst_form)
+    header_text = cmds.text(l='Choose filter types:', p=ofst_form)
+    content_grid = cmds.gridLayout(nc=2, cw=90, ch=20, p=ofst_form)
     CheckBox('transform', 'Transform')
     CheckBox('shape', "Shape")
     CheckBox('mesh', 'Mesh')
@@ -41,13 +41,20 @@ def main():
     CheckBox('joint', 'Joint')
     CheckBox('constraint', 'Constraint')
 
-    footer_row = cmds.rowColumnLayout(nc=2, cs=[(1,0),(2,10)], cw=[(1,85),(2,85)], p=main_form)
-    cmds.button(l='Apply', command=on_apply, p=footer_row)
-    cmds.button(l='Close', command=close_window, p=footer_row)
+    # footer_form = cmds.rowColumnLayout(nc=2, cs=[(1,0),(2,10)], cw=[(1,85),(2,85)], p=ofst_form)
+    footer_form = cmds.formLayout(p=ofst_form)
+    apply_btn = cmds.button(l='Apply', command=on_apply, p=footer_form)
+    close_btn = cmds.button(l='Close', command=close_window, p=footer_form)
+    two_col_form(footer_form, apply_btn, close_btn)
 
-    cmds.formLayout(main_form, edit=True, 
-                    af=[(header_text,'left',4), (content_grid,'left',8), (footer_row,'bottom',0)],
+
+    cmds.formLayout(ofst_form, edit=True, 
+                    af=[(header_text,'left',4), (content_grid,'left',4), (footer_form,'bottom',0), (footer_form,'left',0), (footer_form,'right',0)],
                     ac=[(content_grid,'top',8,header_text)])
+
+
+def two_col_form(form, l_col, r_col):
+    cmds.formLayout(form, e=True, af=[(l_col,'left',0), (r_col,'right',0)], ap=[ (l_col,'right',0,49), (r_col,'left',0,51)])
 
 
 def on_apply(*args):

@@ -20,18 +20,19 @@ def create_ui():
     cmds.window(win, t='New Window', wh=(win_w,win_h), mxb=False, mnb=False, s=False)
     cmds.showWindow(win)
 
-    global main_form
+    global ofst_form
     base_form = cmds.formLayout()
-    main_form = cmds.formLayout(p=base_form)
+    ofst_form = cmds.formLayout(p=base_form)
 
-    cmds.formLayout(base_form, e=True, af=[(main_form,'top',10),(main_form,'right',10),(main_form,'bottom',10),(main_form,'left',10)])
+    cmds.formLayout(base_form, e=True, af=[(ofst_form,'top',10),(ofst_form,'right',10),(ofst_form,'bottom',10),(ofst_form,'left',10)])
 
     global input_field
-    input_row = one_col_layout()
+    input_form = cmds.formLayout(p=ofst_form)
     input_field = cmds.textField(searchField=True, receiveFocusCommand=handle_receive_focus, textChangedCommand=handle_text_change, enterCommand=handle_apply, aie=True, pht='[Pattern], [Replacement]')
+    one_col_form(input_form, input_field)
 
     global pane, match_list, result_list
-    pane = cmds.paneLayout(cn='single', p=main_form, w=win_w-18, st=4)
+    pane = cmds.paneLayout(cn='single', p=ofst_form, st=4)
 
     match_col = cmds.columnLayout(p=pane, adj=True, rs=4)
     cmds.text(l='Matches', p=match_col)
@@ -41,25 +42,18 @@ def create_ui():
     cmds.text(l='Results', p=result_col)
     result_list = cmds.textScrollList(enableKeyboardFocus=False, allowMultiSelection=True, sc=handle_result_sel,p=result_col, w=win_w/8)
 
-    cmds.formLayout(main_form, e=True, ac=[(pane,'top',0,input_row)])
+    cmds.formLayout(ofst_form, e=True, 
+                    af=[(input_form,'left',0),
+                        (input_form,'right',0),
+                        (pane,'left',0),
+                        (pane,'right',0),
+                        (pane,'bottom',0)
+                    ])
 
+    # cmds.formLayout(ofst_form, e=True, ac=[(pane,'top',0,input_form)])
 
-def create_row_column_layout(num_of_col, col_width, col_spacing, parent, **kwargs):
-    cw = []
-    cs = []
-    for i in range(num_of_col):
-        cw.append((i+1, col_width))
-        if i == 0:
-            cs.append((i+1, 0))
-        else:
-            cs.append((i+1, col_spacing))
-    return cmds.rowColumnLayout(nc=num_of_col, cw=cw, cs=cs, p=parent, adj=True, **kwargs)
-
-def one_col_layout(**kwargs):
-    return create_row_column_layout(1, win_w-20, 0, main_form, **kwargs)
-
-def two_cols_layout(**kwargs):
-    return create_row_column_layout(2, win_w/2-12, 4, main_form, **kwargs)
+def one_col_form(form, col):
+    cmds.formLayout(form, e=True, af=[(col,'left',0), (col,'right',0)])
 
 def handle_match_sel(*args):
     selected_items = cmds.textScrollList(match_list, q=True, selectItem=True)
@@ -108,9 +102,6 @@ def handle_text_change(*args):
         splited_text = text.split(', ')
         pattern = splited_text[0]
         replacement = splited_text[1]
-
-        # if replacement:
-            # cmds.paneLayout(pane, e=True, cn="vertical2")
 
         if not omit_incomplete_input(pattern) or not pattern:
             return
@@ -170,12 +161,6 @@ def omit_incomplete_input(input_text):
     if input_text.startswith(repetition_symbols) or input_text.endswith('\\') or [i for i in wrapped_symbols if i in input_text]:
         return
 
-    # if input_text.endswith('\\'):
-    #     return 
-
-    # if [i for i in wrapped_symbols if i in input_text]:
-    #     return
-
     typed_symbols = set(input_text) & set(pair_symbol_dict)
     for i in typed_symbols:
         if input_text.count(i) != input_text.count(pair_symbol_dict[i]):
@@ -206,12 +191,12 @@ def handle_apply(*args):
     # only apply the replacement to selection
     if all_objs:
         name_dict = {n:r for n,r in zip(matched_names, results)}
+
         # reverse the order to rename the objs from the lowest level to the top level, to prevent not able to find the obj after the fore path is renamed
         name_dict = {key:value for key,value in reversed(name_dict.items())}
+
         for i in name_dict:
             cmds.rename(i, name_dict[i])
-        # for i in all_objs:
-        #     cmds.rename(i, name_dict[i])
 
     # apply the replacement to all objects
     else:
