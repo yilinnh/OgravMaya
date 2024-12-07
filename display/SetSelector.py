@@ -50,7 +50,7 @@ def create_ui():
     ofst_form = cmds.formLayout(p=base_form)
     cmds.formLayout(base_form, e=True, af=[(ofst_form,'top',10), (ofst_form,'bottom',10), (ofst_form,'left',10), (ofst_form,'right',10)])
 
-    pane_layout = cmds.paneLayout(cn='vertical2', enableKeyboardFocus=False, p=ofst_form) # 115
+    pane_layout = cmds.paneLayout(cn='vertical2', st=4, enableKeyboardFocus=False, p=ofst_form) # 115
 
     global set_list
     global member_list

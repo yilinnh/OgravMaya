@@ -13,22 +13,22 @@ def main():
 
 
 def toggle_display_local_axis(objs):
+    all_objs = cmds.ls(dag=True)
+    all_shapes = cmds.ls(shapes=True)
+    all_objs = [i for i in all_objs if i not in all_shapes]
+    display_on_list = []
 
-    for i in objs:
-        local_axis_display = cmds.getAttr(f"{i}.displayLocalAxis")
-
-        if local_axis_display == 0:
-            continue
-
-        elif local_axis_display == 1:
-            for j in objs:
-                cmds.setAttr(f"{j}.displayLocalAxis", 0)
-            return
+    for i in all_objs:
+        if cmds.getAttr(f"{i}.displayLocalAxis") == 1:
+            display_on_list.append(i)
+        
+    if display_on_list:
+        for i in display_on_list:
+            cmds.setAttr(f"{i}.displayLocalAxis", 0)
+        return
     
     for i in objs:
         cmds.setAttr(f"{i}.displayLocalAxis", 1)
-
-    return
 
 
 # main()

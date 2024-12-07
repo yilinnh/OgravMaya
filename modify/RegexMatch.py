@@ -10,14 +10,14 @@ def main():
 
 def create_ui():
     global win, win_w, win_h
-    win = 'newWindow'
+    win = 'regexMatch'
     win_w = 300
     win_h = 230
 
     if cmds.window(win, ex=True):
         cmds.deleteUI(win)
 
-    cmds.window(win, t='New Window', wh=(win_w,win_h), mxb=False, mnb=False, s=False)
+    cmds.window(win, t='Regex Match', wh=(win_w,win_h), mxb=False, mnb=False, s=False)
     cmds.showWindow(win)
 
     global ofst_form
@@ -47,7 +47,7 @@ def create_ui():
                         (input_form,'right',0),
                         (pane,'left',0),
                         (pane,'right',0),
-                        (pane,'bottom',0)
+                        (pane,'bottom',0),
                     ])
 
     # cmds.formLayout(ofst_form, e=True, ac=[(pane,'top',0,input_form)])
@@ -206,4 +206,4 @@ def handle_apply(*args):
     cmds.textScrollList(result_list, e=True, si=results)
     cmds.select(results)
         
-main()
+# main()

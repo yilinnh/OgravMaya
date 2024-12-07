@@ -49,7 +49,7 @@ def main():
 
 
     cmds.formLayout(ofst_form, edit=True, 
-                    af=[(header_text,'left',4), (content_grid,'left',4), (footer_form,'bottom',0), (footer_form,'left',0), (footer_form,'right',0)],
+                    af=[(header_text,'left',4), (content_grid,'left',8), (footer_form,'bottom',0), (footer_form,'left',0), (footer_form,'right',0)],
                     ac=[(content_grid,'top',8,header_text)])
 
 
@@ -59,11 +59,10 @@ def two_col_form(form, l_col, r_col):
 
 def on_apply(*args):
     # Get the current selection, including all objects in folded groups
-    sel = cmds.ls(sl=True)
+    objs = cmds.ls(sl=True)
 
-    if not sel: 
-        print("No objects selected")
-        return
+    if not objs: 
+        objs = cmds.ls(dag=True)
 
     global checked_types
 
@@ -73,7 +72,7 @@ def on_apply(*args):
     
     if checked_nested_nodes:
         # list selectoin from both viewport and outliner
-        transform_sel = cmds.ls(sel, type='transform')
+        transform_sel = cmds.ls(objs, type='transform')
 
         if transform_sel:
             for i in transform_sel:
@@ -83,10 +82,10 @@ def on_apply(*args):
         general_checked_types = [i for i in set(checked_types) if i not in set(checked_nested_nodes)]
 
         if general_checked_types:
-            filtered_sel += cmds.ls(sel, type=general_checked_types)
+            filtered_sel += cmds.ls(objs, type=general_checked_types)
         
     else:
-        filtered_sel = cmds.ls(sel, type=checked_types)
+        filtered_sel = cmds.ls(objs, type=checked_types)
         
     # Update selection with filtered results
     cmds.select(set(filtered_sel), replace=True)

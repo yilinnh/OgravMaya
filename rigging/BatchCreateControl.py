@@ -19,14 +19,14 @@ def main():
 
 def create_ui():
     global win, win_w, win_h
-    win = 'newWindow'
+    win = 'batchCreateControls'
     win_w = 200
     win_h = 100
     
     if cmds.window(win, ex=True):
         cmds.deleteUI(win)
 
-    cmds.window(win, t='New Window', wh=(win_w,win_h), mxb=False, mnb=False, s=False)
+    cmds.window(win, t='Batch Create Controls', wh=(win_w,win_h), mxb=False, mnb=False, s=False)
     cmds.showWindow(win)
 
     global main_form
@@ -78,7 +78,7 @@ def handle_apply(*args):
     ctrl_list = []
 
     for jnt in sel:
-        ctrl = cmds.circle( normal=primary_axis, c=(0,0,0), n=f"{jnt}_Ctrl")[0]
+        ctrl = cmds.circle( normal=primary_axis, c=(0,0,0), n=f"{jnt}_ctrl")[0]
         cmds.matchTransform(ctrl, jnt)
         ctrl_list.append(ctrl)
 

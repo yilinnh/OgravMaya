@@ -87,6 +87,10 @@ def create_panels():
         Script(type, "DisplayType").create_btn_with_submenu()
         Script(type, "OverrideColor").create_btn_with_submenu()
         Script(type, "CurveLineWidth").create_btn_with_submenu()
+        Script(type, "UnlockUnhideAttributes").create_btn()
+
+        cmds.text(l="Window")
+        Script(type, "CreateOutliner").create_btn()
 
 
     def create_modify_panel(type="modify"):
@@ -103,6 +107,7 @@ def create_panels():
         Script(type, "StepRotate").create_btn_with_submenu()
         Script(type, "BatchMatchTransform").create_btn_with_submenu()
         Script(type, "MatchToVertex").create_btn()
+        Script(type, "MatchRotateAxis").create_btn()
 
         cmds.text(l="Search")
         Script(type, "RegexMatch").create_btn_with_submenu()
@@ -129,6 +134,7 @@ def create_panels():
         Script(type, "OrientEndJoints").create_btn()
         Script(type, "MatchTransToRotAxis").create_btn()
         Script(type, "RenameJoints").create_btn()
+        Script(type, "ReorientJointTransformAxis").create_btn()
 
         cmds.text(l="Create")
         Script(type, "BatchCreateControl").create_btn()
