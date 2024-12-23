@@ -11,7 +11,6 @@ def create_ui():
     global win_w
     global win_h
     win_w = 250
-    # win_h = 182
     win_h = 214
 
     if cmds.window(win, ex=True):
@@ -27,20 +26,20 @@ def create_ui():
     cmds.formLayout(base_form, e=True, af=[(ofst_form,'top',10),(ofst_form,'right',10),(ofst_form,'bottom',10),(ofst_form,'left',10)])
 
     list_title_form = cmds.formLayout(p=ofst_form)
-    from_title = cmds.text(l='From')
-    to_title = cmds.text(l='To')
-    two_col_form(list_title_form, from_title, to_title)
+    source_title = cmds.text(l='From')
+    target_title = cmds.text(l='To')
+    two_col_form(list_title_form, source_title, target_title)
 
     list_sub_title_form = cmds.formLayout(p=ofst_form)
     sub_title = cmds.text(l='>')
     one_col_form(list_sub_title_form, sub_title)
 
     list_form = cmds.formLayout(p=ofst_form)
-    global from_list
-    global to_list
-    from_list = cmds.textScrollList(p=list_form, enableKeyboardFocus=False, allowMultiSelection=True, h=win_h-110)
-    to_list = cmds.textScrollList(p=list_form, enableKeyboardFocus=False, allowMultiSelection=True, h=win_h-110)
-    two_col_form(list_form, from_list, to_list)
+    global source_list
+    global target_list
+    source_list = cmds.textScrollList(p=list_form, enableKeyboardFocus=False, allowMultiSelection=True, h=win_h-110)
+    target_list = cmds.textScrollList(p=list_form, enableKeyboardFocus=False, allowMultiSelection=True, h=win_h-110)
+    two_col_form(list_form, source_list, target_list)
 
     btns_row = cmds.rowColumnLayout(nc=5,cw=[(1,95),(2,25),(3,25),(4,25),(5,50)], cs=[(1,0),(2,4),(3,0),(4,0),(5,4)], p=ofst_form)
     cmds.button(l='All Transforms', c=match_transforms)
@@ -92,17 +91,29 @@ def create_row_column_layout(num_of_col, col_width, col_spacing, parent, **kwarg
 
 
 def match_transforms(*args, **kwargs):
-    left_list_items = cmds.textScrollList(from_list, q=True, ai=True)
-    right_list_items = cmds.textScrollList(to_list, q=True, ai=True)
-    for i in left_list_items:
-        cmds.matchTransform(i, right_list_items[left_list_items.index(i)], **kwargs)
+    if len(source_sel) != len(target_sel):
+        print("Not equal selection of items")
+        return
 
+    source_list_items = cmds.textScrollList(source_list, q=True, ai=True)
+    target_list_items = cmds.textScrollList(target_list, q=True, ai=True)
+    for i in source_list_items:
+        cmds.matchTransform(i, target_list_items[source_list_items.index(i)], **kwargs)
+
+    # for i in source_sel:
+    #     cmds.matchTransform(i, target_sel[source_sel.index(i)], **kwargs)
 
 def parent_objs(*args):
-    left_list_items = cmds.textScrollList(from_list, q=True, ai=True)
-    right_list_items = cmds.textScrollList(to_list, q=True, ai=True)
-    for i in left_list_items:
-        cmds.parent(i, right_list_items[left_list_items.index(i)])
+    if len(source_sel) != len(target_sel):
+        print("Not equal selection of items")
+        return
+
+    source_list_items = cmds.textScrollList(source_list, q=True, ai=True)
+    target_list_items = cmds.textScrollList(target_list, q=True, ai=True)
+    for i in source_list_items:
+        cmds.parent(i, target_list_items[source_list_items.index(i)])
+    # for i in source_sel:
+    #     cmds.parent(i, target_sel[source_sel.index(i)])
 
 
 def create_sel_callback():
@@ -111,19 +122,22 @@ def create_sel_callback():
 
 
 def update_sel_callback(*args):
-    cmds.textScrollList(from_list, e=True, ra=True)
-    cmds.textScrollList(to_list, e=True, ra=True)
+    cmds.textScrollList(source_list, e=True, ra=True)
+    cmds.textScrollList(target_list, e=True, ra=True)
     sel = cmds.ls(sl=True)
     if sel:
         half_sel_len = int(len(sel)/2)
         # print(sel[0])
-        f_list = sel[:half_sel_len]
-        s_list = sel[half_sel_len:]
-        if len(f_list) != len(s_list):
-            cmds.textScrollList(from_list, e=True, a=sel)
-        else:
-            cmds.textScrollList(from_list, e=True, a=f_list)
-            cmds.textScrollList(to_list, e=True, a=s_list)
+        global source_sel, target_sel
+        source_sel = sel[:half_sel_len]
+        target_sel = sel[half_sel_len:]
+        cmds.textScrollList(source_list, e=True, a=source_sel)
+        cmds.textScrollList(target_list, e=True, a=target_sel)
+        # if len(source_sel) != len(target_sel):
+        #     cmds.textScrollList(source_list, e=True, a=source_sel)
+        # else:
+        #     cmds.textScrollList(source_list, e=True, a=source_sel)
+        #     cmds.textScrollList(target_list, e=True, a=target_sel)
     
 
 def cleanup_callback():

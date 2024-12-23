@@ -13,17 +13,17 @@ def main():
     create_ui()
     on_ofst_check()
     global selected_constraint
-    selected_constraint = ""
+    selected_constraint = ''
 
 def create_ui():
     global win
-    win = "BatchConstrain"
+    win = 'BatchConstrain'
     global win_w
     win_w = 270
-    win_h = 348
+    win_h = 352
     if cmds.window(win, ex=True):
         cmds.deleteUI(win)
-    cmds.window(win, t="Batch Constrain", wh=(win_w,win_h), s=False, mnb=False, mxb=False)
+    cmds.window(win, t='Batch Constrain', wh=(win_w,win_h), s=False, mnb=False, mxb=False)
 
     cmds.showWindow(win)
 
@@ -32,22 +32,26 @@ def create_ui():
     ofst_form = cmds.formLayout(p=base_form)
     option_area = cmds.formLayout(p=ofst_form)
 
-    header = cmds.text(l="Constraint Type:", p=ofst_form)
+    header = cmds.text(l='Constraint Type:', p=ofst_form)
 
     grid = cmds.gridLayout(nc=4, cw=60, p=option_area)
     cmds.radioCollection()
-    RadioBtn("Parent")
-    RadioBtn("Point")
-    RadioBtn("Orient")
-    RadioBtn("Scale")
+    parent_radio_btn = RadioBtn('Parent')
+    RadioBtn('Point')
+    RadioBtn('Orient')
+    RadioBtn('Scale')
+
+    # select the parent radio btn by default
+    cmds.radioButton(parent_radio_btn.btn, e=True, sl=True)
+
     global ofst_check
-    ofst_check = cmds.checkBox(l="Maintain Offset", v=1, changeCommand=on_ofst_check, p=option_area)
+    ofst_check = cmds.checkBox(l='Maintain Offset', v=1, changeCommand=on_ofst_check, p=option_area)
 
     list_title_form = cmds.formLayout(p=ofst_form)
-    two_col_form(list_title_form, cmds.text(l="Drivers"), cmds.text(l="Drivens"))
+    two_col_form(list_title_form, cmds.text(l='Drivers'), cmds.text(l='Drivens'))
 
     list_sub_title_form = cmds.formLayout(p=ofst_form) 
-    one_col_form(list_sub_title_form, cmds.text(l=">"))
+    one_col_form(list_sub_title_form, cmds.text(l='>'))
 
     # list_cols_form = two_cols_layout(h=140)
     list_cols_form = cmds.formLayout(p=ofst_form)
@@ -57,8 +61,8 @@ def create_ui():
     two_col_form(list_cols_form, driver_list, driven_list)
 
     load_btns_form = cmds.formLayout(p=ofst_form)
-    load_drivers_btn = cmds.button(l="Load Drivers", command=handle_load_drivers)
-    load_drivens_btn = cmds.button(l="Load Drivens", command=handle_load_drivens)
+    load_drivers_btn = cmds.button(l='Load Drivers', command=handle_load_drivers)
+    load_drivens_btn = cmds.button(l='Load Drivens', command=handle_load_drivens)
     cmds.formLayout(load_btns_form, e=True,
                     ap=[(load_drivers_btn,'left',0,8),
                         (load_drivers_btn,'right',0,42),
@@ -67,21 +71,21 @@ def create_ui():
                     ])
 
     hr_list_form = cmds.formLayout(p=ofst_form)
-    one_col_form(hr_list_form, cmds.separator(style="in"))
+    one_col_form(hr_list_form, cmds.separator(style='in'))
     hr_footer_form = cmds.formLayout(p=ofst_form)
-    one_col_form(hr_footer_form, cmds.separator(style="in"))
+    one_col_form(hr_footer_form, cmds.separator(style='in'))
 
     footer_form = cmds.formLayout(p=ofst_form)
     three_col_form(footer_form, 
-                   cmds.button(l="Apply", command=handle_apply), 
-                   cmds.button(l="Delete", command=handle_delete), 
-                   cmds.button(l="Close", command=handle_close))
+                   cmds.button(l='Apply', command=handle_apply), 
+                   cmds.button(l='Delete', command=handle_delete), 
+                   cmds.button(l='Close', command=handle_close))
 
-    cmds.formLayout(base_form, e=True, af=[(ofst_form,"top",10), (ofst_form,"right",10), (ofst_form,"bottom",10), (ofst_form,"left",10)])
+    cmds.formLayout(base_form, e=True, af=[(ofst_form,'top',10), (ofst_form,'right',10), (ofst_form,'bottom',10), (ofst_form,'left',10)])
 
     cmds.formLayout(ofst_form, e=True, 
-                    af=[(header,"left",4), 
-                        (option_area,"left",4), 
+                    af=[(header,'left',4), 
+                        (option_area,'left',4), 
                         (list_title_form,'left',0),
                         (list_title_form,'right',0),
                         (list_sub_title_form,'left',0),
@@ -97,16 +101,16 @@ def create_ui():
                         (footer_form,'left',0),
                         (footer_form,'right',0),
                     ], 
-                    ac=[(option_area,"top",4,header), 
-                        (hr_list_form,"top",12,option_area), 
-                        (list_title_form,"top",4,hr_list_form), 
-                        (list_sub_title_form,"top",4,hr_list_form),
-                        (list_cols_form,"top",4,list_title_form), 
-                        (load_btns_form,"top",8,list_cols_form), 
-                        (hr_footer_form,"top",8,load_btns_form), 
-                        (footer_form,"top",8,hr_footer_form)])
+                    ac=[(option_area,'top',4,header), 
+                        (hr_list_form,'top',12,option_area), 
+                        (list_title_form,'top',4,hr_list_form), 
+                        (list_sub_title_form,'top',4,hr_list_form),
+                        (list_cols_form,'top',4,list_title_form), 
+                        (load_btns_form,'top',8,list_cols_form), 
+                        (hr_footer_form,'top',8,load_btns_form), 
+                        (footer_form,'top',8,hr_footer_form)])
 
-    cmds.formLayout(option_area, e=True, ac=[(ofst_check,"top",0,grid)])
+    cmds.formLayout(option_area, e=True, ac=[(ofst_check,'top',0,grid)])
 
 
 def one_col_form(form, col):
@@ -120,10 +124,9 @@ def three_col_form(form, l_col, m_col, r_col):
 
 def append_sel(list_cols_form):
     sel = cmds.ls(sl=True)
-    all_dags = cmds.ls(dag=True)
-    ordered_sel = [i for i in all_dags if i in sel]
     cmds.textScrollList(list_cols_form, e=True, removeAll=True)
-    cmds.textScrollList(list_cols_form, e=True, a=ordered_sel)
+    # cmds.textScrollList(list_cols_form, e=True, a=ordered_sel)
+    cmds.textScrollList(list_cols_form, e=True, a=sel)
 
 def handle_load_drivers(*args):
     append_sel(driver_list)
@@ -150,23 +153,23 @@ def select_drivens(*args):
 
 def handle_apply(*args):
     if len(driver_list_items) != len(driven_list_items):
-        print("The quantity of the first group does not match the second group")
+        print("The quantity of drivers does not match drivens'")
         return
 
     if not selected_constraint:
         print("No constraint selected")
         return
 
-    elif selected_constraint == "Parent":
+    elif selected_constraint == 'Parent':
         for i in driver_list_items:
             cmds.parentConstraint(i, driven_list_items[driver_list_items.index(i)], maintainOffset=ofst_value)
-    elif selected_constraint == "Point":
+    elif selected_constraint == 'Point':
         for i in driver_list_items:
             cmds.pointConstraint(i, driven_list_items[driver_list_items.index(i)], maintainOffset=ofst_value)
-    elif selected_constraint == "Orient":
+    elif selected_constraint == 'Orient':
         for i in driver_list_items:
             cmds.orientConstraint(i, driven_list_items[driver_list_items.index(i)], maintainOffset=ofst_value)
-    elif selected_constraint == "Scale":
+    elif selected_constraint == 'Scale':
         for i in driver_list_items:
             cmds.scaleConstraint(i, driven_list_items[driver_list_items.index(i)], maintainOffset=ofst_value)
 
@@ -175,26 +178,26 @@ def handle_delete(*args):
     constraints = []
 
     if not selected_constraint:
-        print("No constraint selected")
+        print('No constraint selected')
         return
 
-    elif selected_constraint == "Parent":
+    elif selected_constraint == 'Parent':
         for i in driven_list_items:
-            constraints += (cmds.listRelatives(i, c=True, type="parentConstraint"))
-    elif selected_constraint == "Point":
+            constraints += (cmds.listRelatives(i, c=True, type='parentConstraint'))
+    elif selected_constraint == 'Point':
         for i in driven_list_items:
-            constraints += (cmds.listRelatives(i, c=True, type="pointConstraint"))
-    elif selected_constraint == "Orient":
+            constraints += (cmds.listRelatives(i, c=True, type='pointConstraint'))
+    elif selected_constraint == 'Orient':
         for i in driven_list_items:
-            constraints += (cmds.listRelatives(i, c=True, type="orientConstraint"))
-    elif selected_constraint == "Scale":
+            constraints += (cmds.listRelatives(i, c=True, type='orientConstraint'))
+    elif selected_constraint == 'Scale':
         for i in driven_list_items:
-            constraints += (cmds.listRelatives(i, c=True, type="scaleConstraint"))
+            constraints += (cmds.listRelatives(i, c=True, type='scaleConstraint'))
     
     cmds.delete(constraints)
     constraints.clear()
 
 def handle_close(*args):
-    cmds.deleteUI("BatchConstrain")
+    cmds.deleteUI('BatchConstrain')
 
 # main()

@@ -46,10 +46,14 @@ def handle_slider_change(*args):
     global value
     value = float(str(cmds.floatSlider(slider, q=True, v=True))[0:3])
     cmds.text(value_text, e=True, l=value)
-    sel = cmds.ls(sl=True)
+    sel = cmds.ls(sl=True, type='transform')
     if sel:
+        filtered_sel = [i for i in sel if cmds.listRelatives(i, c=True, type="nurbsCurve")]
         for i in sel:
-            cmds.setAttr(f"{i}.lineWidth", value)
+            try:
+                cmds.setAttr(f"{i}.lineWidth", value)
+            except:
+                continue
 
 
 def handle_apply(*args):

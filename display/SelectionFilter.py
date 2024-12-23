@@ -36,10 +36,10 @@ def main():
     CheckBox('transform', 'Transform')
     CheckBox('shape', "Shape")
     CheckBox('mesh', 'Mesh')
-    CheckBox('nurbsCurve', 'NURBS')
-    CheckBox('clusterHandle', 'Cluster')
+    CheckBox('nurbsCurve', 'Curve')
     CheckBox('joint', 'Joint')
     CheckBox('constraint', 'Constraint')
+    CheckBox('clusterHandle', 'Cluster')
 
     # footer_form = cmds.rowColumnLayout(nc=2, cs=[(1,0),(2,10)], cw=[(1,85),(2,85)], p=ofst_form)
     footer_form = cmds.formLayout(p=ofst_form)
@@ -67,19 +67,25 @@ def on_apply(*args):
     global checked_types
 
     filtered_sel = []
-    nested_node = ['nurbsCurve', 'clusterHandle']
-    checked_nested_nodes = set(nested_node) & set(checked_types)
+    nested_node_types = ['nurbsCurve', 'clusterHandle']
+    checked_nested_node_types = set(nested_node_types) & set(checked_types)
     
-    if checked_nested_nodes:
-        # list selectoin from both viewport and outliner
-        transform_sel = cmds.ls(objs, type='transform')
+    if checked_nested_node_types:
+        for t in checked_nested_node_types:
+            # List selectoin from both viewport and outliner
+            transform_sel = cmds.ls(objs, type='transform')
 
-        if transform_sel:
-            for i in transform_sel:
-                if cmds.listRelatives(i, c=True, type=checked_nested_nodes):
-                    filtered_sel.append(i)
+            if transform_sel:
+                # for i in transform_sel:
+                #     if cmds.listRelatives(i, c=True, type=checked_nested_node_types):
+                #         filtered_sel.append(i)
 
-        general_checked_types = [i for i in set(checked_types) if i not in set(checked_nested_nodes)]
+                # Find the transform node instead of the shape node
+                filtered_sel = [i for i in transform_sel if cmds.listRelatives(i, c=True, type=t)]
+
+        # general_checked_types = [i for i in checked_types if i not in checked_nested_node_types]
+        for i in checked_nested_node_types:
+            general_checked_types = checked_types.remove(i)
 
         if general_checked_types:
             filtered_sel += cmds.ls(objs, type=general_checked_types)

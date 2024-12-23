@@ -17,7 +17,7 @@ def main():
     if cmds.window(window, ex=True):
         cmds.deleteUI(window)
 
-    win_w = 270
+    win_w = 260
     win_h = 104
     cmds.window(window, t="Display Type", wh=(win_w,win_h), mnb=False, mxb=False, s=False)
     cmds.showWindow(window)
@@ -50,7 +50,7 @@ def main():
                     af=[(f_row,"left",4), (s_row,"left",4), (footer_form,"bottom",0), (footer_form,'left',0), (footer_form,'right',0)], 
                     ac=[(s_row,"top",4,f_row)])
 
-    initialize_sets()
+    # initialize_sets()
 
 
 def two_col_form(form, l_col, r_col):
@@ -71,30 +71,30 @@ def create_row_column_layout(num_of_col, col_width, col_spacing, parent):
     return cmds.rowColumnLayout(nc=num_of_col, cw=cw, cs=cs, p=parent)
 
 
-def initialize_sets():
-    global root_set, display_sets, tem_set, ref_set, vis_set
-    root_set = "displayTypeSet"
-    # selector_set = "selectionSet"
-    display_sets = ["T", "R", "H"]
-    tem_set, ref_set, vis_set = display_sets
-    all_sets = cmds.listSets(allSets=True)
+# def initialize_sets():
+#     global root_set, display_sets, tem_set, ref_set, vis_set
+#     root_set = "displayTypeSet"
+#     # selector_set = "selectionSet"
+#     display_sets = ["Template", "Reference", "Hidden"]
+#     tem_set, ref_set, vis_set = display_sets
+#     all_sets = cmds.listSets(allSets=True)
 
-    # if selector_set in all_sets:
-    #     for i in display_sets:
-    #         if i not in all_sets:
-    #             cmds.sets(n=i, empty=True)
-    #             cmds.sets(i, e=True, forceElement=selector_set)
-    if root_set in all_sets:
-        for i in display_sets:
-            if i not in all_sets:
-                cmds.sets(n=i, empty=True)
-                cmds.sets(i, e=True, forceElement=root_set)
-    elif root_set not in all_sets:
-        cmds.sets(n=root_set, empty=True)
-        for i in display_sets:
-            if i not in all_sets:
-                cmds.sets(n=i, empty=True)
-                cmds.sets(i, e=True, forceElement=root_set)
+#     # if selector_set in all_sets:
+#     #     for i in display_sets:
+#     #         if i not in all_sets:
+#     #             cmds.sets(n=i, empty=True)
+#     #             cmds.sets(i, e=True, forceElement=selector_set)
+#     if root_set in all_sets:
+#         for i in display_sets:
+#             if i not in all_sets:
+#                 cmds.sets(n=i, empty=True)
+#                 cmds.sets(i, e=True, forceElement=root_set)
+#     elif root_set not in all_sets:
+#         cmds.sets(n=root_set, empty=True)
+#         for i in display_sets:
+#             if i not in all_sets:
+#                 cmds.sets(n=i, empty=True)
+#                 cmds.sets(i, e=True, forceElement=root_set)
 
 
 
@@ -115,26 +115,24 @@ def handle_apply(*args):
         cmds.setAttr(f"{i}.overrideDisplayType", display_type)
         cmds.setAttr(f"{i}.visibility", vis_value)
 
-        if display_type == 0:
-            cmds.sets(remove=tem_set)
-            cmds.sets(remove=ref_set)
-        elif display_type == 1:
-            cmds.sets(add=tem_set)
-            cmds.sets(remove=ref_set)
-        elif display_type == 2:
-            cmds.sets(add=ref_set)
-            cmds.sets(remove=tem_set)
+        # if display_type == 0:
+        #     cmds.sets(remove=tem_set)
+        #     cmds.sets(remove=ref_set)
+        # elif display_type == 1:
+        #     cmds.sets(add=tem_set)
+        #     cmds.sets(remove=ref_set)
+        # elif display_type == 2:
+        #     cmds.sets(add=ref_set)
+        #     cmds.sets(remove=tem_set)
         
-        if vis_value == 0:
-            cmds.sets(add=vis_set)
-        elif vis_value == 1:
-            cmds.sets(remove=vis_set)
+        # if vis_value == 0:
+        #     cmds.sets(add=vis_set)
+        # elif vis_value == 1:
+        #     cmds.sets(remove=vis_set)
 
 
 def handle_close(*args):
     cmds.deleteUI("DisplayType")
 
-def test():
-    print("this is the display type")
 
 # main()

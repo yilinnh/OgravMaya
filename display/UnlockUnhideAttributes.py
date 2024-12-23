@@ -1,11 +1,14 @@
 import maya.cmds as cmds
 
 def main():
-    sel = cmds.ls(sl=True, dag=True)
+    sel = cmds.ls(sl=True)
     if not sel:
         print("No objects selected")
     all_shapes = cmds.ls(shapes=True)
-    sel = [i for i in sel if i not in all_shapes]
+    for i in all_shapes:
+        sel.remove(i)
+    # sel = [i for i in sel if i not in all_shapes]
+    
     for i in sel:
         for attr in ['translate', 'rotate', 'scale']:
             for axis in ['X', 'Y', 'Z']:

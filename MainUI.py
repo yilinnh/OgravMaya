@@ -80,7 +80,6 @@ def create_panels():
         cmds.text(l="Select")
         Script(type, "SetSelector").create_btn_with_submenu()
         Script(type, "SelectionFilter").create_btn_with_submenu()
-        Script(type, "SoftSelection").create_btn()
 
         cmds.text(l="Attribute")
         Script(type, "LocalAxisDisplay").create_btn()
@@ -113,7 +112,7 @@ def create_panels():
         Script(type, "RegexMatch").create_btn_with_submenu()
 
         cmds.text(l="Hierarchy")
-        Script(type, "AscendHierarchyLevel").create_btn()
+        Script(type, "StepHierarchyLevel").create_btn()
         Script(type, "CombineShapes").create_btn()
 
         cmds.text(l="Misc")
@@ -132,7 +131,6 @@ def create_panels():
         cmds.setParent(t_col.column_path)
         cmds.text(l="Skeleton")
         Script(type, "OrientEndJoints").create_btn()
-        Script(type, "MatchTransToRotAxis").create_btn()
         Script(type, "RenameJoints").create_btn()
         Script(type, "ReorientJointTransformAxis").create_btn()
 

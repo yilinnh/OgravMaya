@@ -85,18 +85,22 @@ def handle_receive_focus(*args):
 
 
 def handle_text_change(*args):
+    global matched_names, results
     text = cmds.textField(input_field, q=True, text=True)
     cmds.paneLayout(pane, e=True, cn="single")
 
     if not text:
+        matched_names = ''
+        results = ''
         cmds.textScrollList(match_list, e=True, ra=True)
         cmds.textScrollList(result_list, e=True, ra=True)
         return
     
-    if text.endswith(','):
+    elif text.endswith(','):
+        results = ''
         return
 
-    if ', ' in text and not text.startswith(', '):
+    elif ', ' in text and not text.startswith(', '):
         global pattern, replacement
 
         splited_text = text.split(', ')
@@ -106,10 +110,7 @@ def handle_text_change(*args):
         if not omit_incomplete_input(pattern) or not pattern:
             return
 
-        global matched_names, results
-
-
-        # this will get the full path name
+        # this will return the full path name
         matched_names = [i for i in all_objs if re.search(pattern, i)]
 
         cmds.textScrollList(match_list, e=True, ra=True)
@@ -182,11 +183,8 @@ def get_short_name(name_list):
 
 
 def handle_apply(*args):
-    if not cmds.textField(input_field, q=True, text=True):
+    if not cmds.textField(input_field, q=True, text=True) or not results:
         return
-
-    print(f'matched_names: {matched_names}')
-    print(f'results: {results}')
 
     # only apply the replacement to selection
     if all_objs:

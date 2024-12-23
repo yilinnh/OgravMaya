@@ -15,14 +15,15 @@ def main():
         if sel_parent:
             cmds.parent(i, world=True)
 
-        sel_matrix = cmds.xform(i, q=True, matrix=True)
-
         grp = cmds.group(empty=True, n=f"{i}_ofst")
-        # set the tranformation no matter the obj has offset poivot 
+        # match the tranformation no matter the target obj has offset poivot, while using matchTransform instead will match the pivot not the obj
+        sel_matrix = cmds.xform(i, q=True, matrix=True)
         cmds.xform(grp, matrix=sel_matrix)
+
         cmds.matchTransform(grp, i, pivots=True)
 
         cmds.parent(i, grp)
+        # cmds.makeIdentity(grp, apply=True, t=True, s=True)
 
         if sel_parent:
             cmds.parent(grp, sel_parent)
@@ -33,9 +34,6 @@ def main():
         # for attr in ["translate", "rotate", "scale", "visibility"]:
         #     cmds.setAttr(f"{grp}.{attr}", lock=1)
 
-
-    # if current_parent:
-    #     cmds.parent(grp_list, current_parent)
 
     if len(sel) == 1:
         return

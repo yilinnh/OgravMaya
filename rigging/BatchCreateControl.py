@@ -45,7 +45,7 @@ def create_ui():
 
     footer_btns_row = two_cols_layout()
     cmds.button(l='Apply', c=handle_apply)
-    cmds.button(l='Cancel')
+    cmds.button(l='Close', c=handle_close)
 
     cmds.formLayout(main_form, e=True, af=[(footer_btns_row,'bottom',0)],
                     ac=[(primary_axis_row,'top',4,header)])
@@ -83,8 +83,11 @@ def handle_apply(*args):
         ctrl_list.append(ctrl)
 
     cmds.select(ctrl_list)
+    cmds.deleteUI('batchCreateControls')
 
 
+def handle_close(*args):
+    cmds.deleteUI('batchCreateControls')
 
 
 # main()

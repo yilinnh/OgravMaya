@@ -14,7 +14,7 @@ def initialize_module():
     new_set = ''
     set_sel = []
     previous_member_sel = []
-    common_title = '----- COMMON -----'
+    common_title = "----- COMMON -----"
 
     if root_set in cmds.ls(sets=True):
         print(f"{root_set} found")
@@ -40,7 +40,7 @@ def create_ui():
     global win_w
     global win_h
     win_w = 300
-    win_h = 220
+    win_h = 230
     cmds.window(win, t='Set Selector', mxb=False, mnb=False, wh=(win_w,win_h), s=False, closeCommand=remove_callbacks)
     cmds.showWindow(win)
 
@@ -160,16 +160,18 @@ def update_member_items(*args):
     remove_all_items(member_list)
 
     if set_sel:
-        members = cmds.sets(set_sel, q=True)
+        unordered_members = cmds.sets(set_sel, q=True)
 
-        if members:
-            # Order the members as how it is shown in the outliner
+        if unordered_members:
+            # Order the members as how it is shown in the outliner, as queried set members are disordered
             global all_dag_objs, ordered_members
             all_dag_objs = cmds.ls(dag=True)
-            ordered_members = [i for i in all_dag_objs if i in members]
+            ordered_members = [i for i in all_dag_objs if i in unordered_members]
 
-            # Order members which are not dag objs, e.g., curve points
-            ordered_members += [i for i in members if i not in ordered_members]
+            # Append unordered items which are not dag objs, e.g., curve points
+            # ordered_members += [i for i in unordered_members if i not in ordered_members]
+            non_dag_members = set(ordered_members) ^ set(unordered_members)
+            ordered_members.extend(non_dag_members)
 
             append_items(member_list, ordered_members)
 
@@ -239,7 +241,7 @@ def on_member_select(*args):
         cmds.select(member_sel, replace=True)
         previous_member_sel = member_sel
 
-        print('select ' + ', '.join(member_sel))
+        print("select " + ", ".join(member_sel))
 
 
 # Rename the item
@@ -279,7 +281,7 @@ def on_double_click():
                 update_set_sel()
 
             else:
-                print('No objects found')
+                print("No objects found")
 
 
 # ---------------- button events ----------------
@@ -372,7 +374,7 @@ def added_callback(node, clientData):
 
     def deferred_callback():
         global abort_added_callback
-        print('callback of added')
+        print("callback of added")
         update_set_items() 
         # update_set_sel()
         select_previous_set_items()
@@ -392,7 +394,7 @@ def removed_callback(node, clientData):
 
     def deferred_callback():
         global abort_removed_callback
-        print('callback of removed')
+        print("callback of removed")
         update_set_items()
         # update_set_sel()
         select_previous_set_items()
@@ -410,7 +412,7 @@ def undo_callback(clientData):
     abort_added_callback, abort_removed_callback = True, True
 
     def undo_callback_deferred():
-        print('callback of undo')
+        print("callback of undo")
         update_set_items()
         # update_set_sel()
         select_previous_set_items()
@@ -431,7 +433,7 @@ def redo_callback(clientData):
     abort_added_callback, abort_removed_callback = True, True
 
     def redo_callback_deferred():
-        print('callback of redo')
+        print("callback of redo")
         update_set_items()
         # update_set_sel()
         select_previous_set_items()

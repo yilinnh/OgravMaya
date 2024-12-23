@@ -16,7 +16,7 @@ def main():
         print("Not matched objects quantity")
         return
 
-    proxy = cmds.group(n='proxy',empty=True)
+    proxy = cmds.group(n='proxy',empty=True) 
 
     for i in source:
         cmds.matchTransform(proxy, target[source.index(i)])
@@ -24,7 +24,9 @@ def main():
 
         cmds.parent(i, proxy)
         cmds.makeIdentity(i, apply=True)
-        cmds.parent(i, sel_parent)
+
+        if sel_parent:
+            cmds.parent(i, sel_parent)
 
     cmds.delete(proxy)
 
