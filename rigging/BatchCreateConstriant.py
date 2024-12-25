@@ -13,7 +13,7 @@ def main():
     create_ui()
     on_ofst_check()
     global selected_constraint
-    selected_constraint = ''
+    selected_constraint = 'Parent'
 
 def create_ui():
     global win
@@ -199,5 +199,9 @@ def handle_delete(*args):
 
 def handle_close(*args):
     cmds.deleteUI('BatchConstrain')
+    global selected_constraint, driver_list_items, driven_list_items
+    selected_constraint = ''
+    driver_list_items = []
+    driven_list_items = []
 
 # main()

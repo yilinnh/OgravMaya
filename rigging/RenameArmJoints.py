@@ -13,7 +13,7 @@ def main():
 
 def rename_arm_jnts():
     arm_main_jnts = arm_jnts[:4]
-    arm_main_jnt_names = ('Clavicle', 'Humerus', 'Radius', 'Wrist')
+    arm_main_jnt_names = ('shoulder', 'elbow', 'radius', 'wrist')
     for j,n in zip(arm_main_jnts, arm_main_jnt_names):
         cmds.rename(j, f'L_{n}')
 
@@ -27,7 +27,7 @@ def rename_finger_jnts():
 
     sorted_init_finger_jnts = dict(sorted(init_finger_jnts_pos.items(), key=lambda x: x[1], reverse=True)) # sort the list of tuples (which is dict.items()) by the value (jnt position value, which is jnt[1] in the dict)
 
-    finger_jnt_names = ('Thumb', 'Index', 'Middle', 'Ring', 'Pinky')
+    finger_jnt_names = ('thumb', 'index', 'middle', 'ring', 'pinky')
     finger_jnt_name_lists = [format_finger_jnt_names(i) for i in finger_jnt_names]
     
     print(sorted_init_finger_jnts)
@@ -49,9 +49,9 @@ def get_whole_finger_jnts(init_jnt):
 
 def format_finger_jnt_names(name):
     if name == 'Thumb':
-        name_list = (f'L_{name}_end', f'L_{name}_2', f'L_{name}_1', f'L_{name}_meta')
+        name_list = (f'l_{name}_end', f'l_{name}_2', f'l_{name}_1', f'l_{name}_meta')
     else:
-        name_list = (f'L_{name}_end', f'L_{name}_3', f'L_{name}_2', f'L_{name}_1', f'L_{name}_meta')
+        name_list = (f'l_{name}_end', f'l_{name}_3', f'l_{name}_2', f'l_{name}_1', f'l_{name}_meta')
     return name_list
 
 # main()

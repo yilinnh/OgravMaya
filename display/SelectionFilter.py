@@ -39,6 +39,7 @@ def main():
     CheckBox('nurbsCurve', 'Curve')
     CheckBox('joint', 'Joint')
     CheckBox('constraint', 'Constraint')
+    CheckBox('locator', 'Locator')
     CheckBox('clusterHandle', 'Cluster')
 
     # footer_form = cmds.rowColumnLayout(nc=2, cs=[(1,0),(2,10)], cw=[(1,85),(2,85)], p=ofst_form)
@@ -67,7 +68,7 @@ def on_apply(*args):
     global checked_types
 
     filtered_sel = []
-    nested_node_types = ['nurbsCurve', 'clusterHandle']
+    nested_node_types = ['nurbsCurve', 'locator', 'clusterHandle']
     checked_nested_node_types = set(nested_node_types) & set(checked_types)
     
     if checked_nested_node_types:

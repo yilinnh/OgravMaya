@@ -131,7 +131,7 @@ def create_panels():
         cmds.setParent(t_col.column_path)
         cmds.text(l="Skeleton")
         Script(type, "OrientEndJoints").create_btn()
-        Script(type, "RenameJoints").create_btn()
+        Script(type, "RenameArmJoints").create_btn()
         Script(type, "ReorientJointTransformAxis").create_btn()
 
         cmds.text(l="Create")
@@ -140,12 +140,15 @@ def create_panels():
         Script(type, "BatchCreateConstriant").create_btn_with_submenu()
         Script(type, "BatchControlConstraintOffset").create_btn()
 
+        cmds.text(l='Automation')
+        Script(type, "AutoMirror").create_btn()
+
     create_display_panel()
     create_modify_panel()
     create_rigging_panel()
 
 def create_scroll_layout(parent):
-    return cmds.scrollLayout(w=win_w-2, h=win_h-36, p=parent, verticalScrollBarAlwaysVisible=True)
+    return cmds.scrollLayout(w=win_w-2, h=win_h-40, p=parent, verticalScrollBarAlwaysVisible=True)
 
 def edit_ofst_form_layout(form, scroll):
     cmds.formLayout(form, e=True, af=[(scroll,"top",0), (scroll,"left",0), (scroll,"right",-20)])
