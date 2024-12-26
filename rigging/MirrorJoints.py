@@ -73,23 +73,24 @@ def mirror_joints():
         #     all_mir_joints.extend(all_joint_descendants)
 
         print(f'- {i}')
+
         if all_joint_descendants:
             all_joint_descendants = [i for i in all_joints if i in all_joint_descendants]
-            all_joint_descendant_list = [i.split('|')[all_joint_descendants.index(i):] for i in all_joint_descendants]
-            all_joint_descendants = ('|').join(all_joint_descendant_list)
 
-            for i in all_joint_descendants:
-                split_list = i.split('|')
-                print(i)
-                print(f"{(len(split_list) - 2) * ' '}- {split_list[-1]}")
+            for d in all_joint_descendants:
+                split_list = d.split('|')
+                split_list = split_list[split_list.index(i.split('|')[-1]):]
+                print(f"{(len(split_list) * 2 - 2) * ' '}- {split_list[-1]}")
             
 
     ### reorient the joints that should orient to the world
     world_oriented_src_joints = [i for i in all_src_joints if is_joint_oriented_to_world(i)]
     world_oriented_mir_joints = [i.replace(src, mir, 1) for i in world_oriented_src_joints]
 
-    print(f'world_oriented_src_joints: {world_oriented_mir_joints}')
     [cmds.joint(i, e=True, oj='none') for i in world_oriented_mir_joints]
+
+    print(f"\nWorld oriented joints:")
+    [print(f"- {i}") for i in world_oriented_mir_joints]
 
 def is_joint_oriented_to_world(joint_name):
     """
@@ -114,4 +115,4 @@ def is_joint_oriented_to_world(joint_name):
 
 
 
-mirror_joints()
+# mirror_joints()
