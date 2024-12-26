@@ -6,6 +6,9 @@ mir = 'r_'
 ctrl_grp_suffix = '_ctrl'
 mirror_axis = 'x'
 
+main_folder = 'OgravMaya'
+sub_folder = 'rigging'
+
 def main():
 
     all_objs = cmds.ls()
@@ -18,8 +21,6 @@ def main():
             cmds.warning(i)
         return
 
-    main_folder = 'OgravMaya'
-    sub_folder = 'rigging'
 
     MirrorJoints = importlib.import_module(f'{main_folder}.{sub_folder}.MirrorJoints')
     MirrorIkHandles = importlib.import_module(f'{main_folder}.{sub_folder}.MirrorIkHandles')
