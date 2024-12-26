@@ -1,4 +1,8 @@
 import maya.cmds as cmds
+import importlib
+AutoMirror = importlib.import_module('OgravMaya.rigging.AutoMirror')
+src = getattr(AutoMirror, 'src') 
+mir = getattr(AutoMirror, 'mir')
 
 def mirror_constraints():
 
@@ -6,11 +10,11 @@ def mirror_constraints():
     print("# CONSTRAINT")
     print("--------------------------------------------------")
 
-    all_constraints = [i for i in cmds.ls(type='constraint') if i.startswith('l_')]
+    all_constraints = [i for i in cmds.ls(type='constraint') if i.startswith(src)]
     axes = {'X', 'Y', 'Z'}
 
     def replace_prefix(item):
-        return item.replace('l_', 'r_', 1)
+        return item.replace(src, mir, 1)
 
     for constr in all_constraints:
         # constraint_type = constr.split('_')[-1][0:-1] # e.g. l_cube_parentConstraint1
@@ -41,12 +45,12 @@ def mirror_constraints():
                 cmds.warning(f'More than one driven obj: {driven_obj}')
 
             # Mirror driver and driven
-            mirrored_driver_list = [replace_prefix(i) for i in driver_list] or []
-            mirrored_driven = replace_prefix(driven_obj) or []
+            mir_driver_list = [replace_prefix(i) for i in driver_list] or []
+            mir_driven = replace_prefix(driven_obj) or []
 
-            if not mirrored_driver_list:
+            if not mir_driver_list:
                 print('No driver found')
-            if not mirrored_driver_list:
+            if not mir_driver_list:
                 print('No driver found')
 
             # Check if there're skip axes and create parentConstraint
@@ -55,11 +59,11 @@ def mirror_constraints():
             if not skipped_rotate:
                 skipped_rotate = ['none']
 
-            mirrored_constraint = cmds.parentConstraint(mirrored_driver_list, mirrored_driven, st=skipped_translate, sr=skipped_rotate, mo=True)
+            mir_constraint = cmds.parentConstraint(mir_driver_list, mir_driven, st=skipped_translate, sr=skipped_rotate, mo=True)
 
-            print(f"- {mirrored_constraint[0]}")
-            print(f"    - driver: {', '.join(mirrored_driver_list)}")
-            print(f"    - driven: {mirrored_driven}")
+            print(f"- {mir_constraint[0]}")
+            print(f"    - driver: {', '.join(mir_driver_list)}")
+            print(f"    - driven: {mir_driven}")
             print(f"    - skipped_translate: {', '.join(skipped_translate)}")
             print(f"    - skipped_rotate: {', '.join(skipped_rotate)}")
 
@@ -81,23 +85,23 @@ def mirror_constraints():
                 cmds.warning(f'More than one driven obj: {driven_obj}')
 
             # Mirror driver and driven
-            mirrored_driver_list = [replace_prefix(i) for i in driver_list] or []
-            mirrored_driven = replace_prefix(driven_obj) or []
+            mir_driver_list = [replace_prefix(i) for i in driver_list] or []
+            mir_driven = replace_prefix(driven_obj) or []
 
-            if not mirrored_driver_list:
+            if not mir_driver_list:
                 print('No driver found')
-            if not mirrored_driver_list:
+            if not mir_driver_list:
                 print('No driver found')
 
             # Check if there're skip axes and create parentConstraint
             if not skipped_scale:
                 skipped_scale = ['none']
 
-            mirrored_constraint = cmds.scaleConstraint(mirrored_driver_list, mirrored_driven, sk=skipped_scale, mo=True)
+            mir_constraint = cmds.scaleConstraint(mir_driver_list, mir_driven, sk=skipped_scale, mo=True)
 
-            print(f"- {mirrored_constraint[0]}")
-            print(f"    - driver: {', '.join(mirrored_driver_list)}")
-            print(f"    - driven: {mirrored_driven}")
+            print(f"- {mir_constraint[0]}")
+            print(f"    - driver: {', '.join(mir_driver_list)}")
+            print(f"    - driven: {mir_driven}")
             print(f"    - skipped_scale: {', '.join(skipped_scale)}")
 
 
@@ -118,23 +122,23 @@ def mirror_constraints():
                 cmds.warning(f'More than one driven obj: {driven_obj}')
 
             # Mirror driver and driven
-            mirrored_driver_list = [replace_prefix(i) for i in driver_list] or []
-            mirrored_driven = replace_prefix(driven_obj) or []
+            mir_driver_list = [replace_prefix(i) for i in driver_list] or []
+            mir_driven = replace_prefix(driven_obj) or []
 
-            if not mirrored_driver_list:
+            if not mir_driver_list:
                 print('No driver found')
-            if not mirrored_driver_list:
+            if not mir_driver_list:
                 print('No driver found')
 
             # Check if there're skip axes and create parentConstraint
             if not skipped_translate:
                 skipped_translate = ['none']
 
-            mirrored_constraint = cmds.pointConstraint(mirrored_driver_list, mirrored_driven, sk=skipped_translate, mo=True)
+            mir_constraint = cmds.pointConstraint(mir_driver_list, mir_driven, sk=skipped_translate, mo=True)
 
-            print(f"- {mirrored_constraint[0]}")
-            print(f"    - driver: {', '.join(mirrored_driver_list)}")
-            print(f"    - driven: {mirrored_driven}")
+            print(f"- {mir_constraint[0]}")
+            print(f"    - driver: {', '.join(mir_driver_list)}")
+            print(f"    - driven: {mir_driven}")
             print(f"    - skipped_translate: {', '.join(skipped_translate)}")
 
 
@@ -155,23 +159,23 @@ def mirror_constraints():
                 cmds.warning(f'More than one driven obj: {driven_obj}')
 
             # Mirror driver and driven
-            mirrored_driver_list = [replace_prefix(i) for i in driver_list] or []
-            mirrored_driven = replace_prefix(driven_obj) or []
+            mir_driver_list = [replace_prefix(i) for i in driver_list] or []
+            mir_driven = replace_prefix(driven_obj) or []
 
-            if not mirrored_driver_list:
+            if not mir_driver_list:
                 print('No driver found')
-            if not mirrored_driver_list:
+            if not mir_driver_list:
                 print('No driver found')
 
             # Check if there're skip axes and create parentConstraint
             if not skipped_rotate:
                 skipped_rotate = ['none']
 
-            mirrored_constraint = cmds.rotateConstraint(mirrored_driver_list, mirrored_driven, sk=skipped_rotate, mo=True)
+            mir_constraint = cmds.rotateConstraint(mir_driver_list, mir_driven, sk=skipped_rotate, mo=True)
 
-            print(f"- {mirrored_constraint[0]}")
-            print(f"    - driver: {', '.join(mirrored_driver_list)}")
-            print(f"    - driven: {mirrored_driven}")
+            print(f"- {mir_constraint[0]}")
+            print(f"    - driver: {', '.join(mir_driver_list)}")
+            print(f"    - driven: {mir_driven}")
             print(f"    - skipped_rotate: {', '.join(skipped_rotate)}")
 
 # mirror_constraints()

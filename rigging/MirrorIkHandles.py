@@ -1,4 +1,8 @@
 import maya.cmds as cmds
+import importlib
+AutoMirror = importlib.import_module('OgravMaya.rigging.AutoMirror')
+src = getattr(AutoMirror, 'src') 
+mir = getattr(AutoMirror, 'mir')
 
 def mirror_ik_handles():
 
@@ -7,7 +11,7 @@ def mirror_ik_handles():
     print("--------------------------------------------------")
 
     # ik = 'l_leg_ikHandle'
-    all_ik = [i for i in cmds.ls(type='ikHandle') if i.startswith('l_')]
+    all_ik = [i for i in cmds.ls(type='ikHandle') if i.startswith(src)]
 
     for ik in all_ik:
 
@@ -15,7 +19,6 @@ def mirror_ik_handles():
         all_connections = cmds.listConnections(ik, c=True, p=False)
 
         connection_dict = {}
-
         for i in range(0, len(all_connections), 2):
             connection_dict[all_connections[i].split('.')[1]] = all_connections[i+1]
 
@@ -30,23 +33,23 @@ def mirror_ik_handles():
         connection_dict['endEffector'] = end_joint
 
         # Mirror the dict
-        mirrored_connection_dict = {key:value.replace('l_', 'r_', 1) for key,value in connection_dict.items()}
+        mir_connection_dict = {key:value.replace(src, mir, 1) for key,value in connection_dict.items()}
 
         # Create IK handle
-        mirrored_ik = cmds.ikHandle(sj=mirrored_connection_dict['startJoint'], ee=mirrored_connection_dict['endEffector'], solver=mirrored_connection_dict['ikSolver'])
+        mir_ik = cmds.ikHandle(sj=mir_connection_dict['startJoint'], ee=mir_connection_dict['endEffector'], solver=mir_connection_dict['ikSolver'])
 
         # Rename IK handle and move to the appropriate
-        # mirrored_ik = ['ikHandle1', 'effector2']
-        mirrored_ik_name = mirrored_ik[0]
-        mirrored_ik_name = cmds.rename(mirrored_ik_name, ik.replace('l_', 'r_', 1))
+        # mir_ik = ['ikHandle1', 'effector2']
+        mir_ik_name = mir_ik[0]
+        mir_ik_name = cmds.rename(mir_ik_name, ik.replace(src, mir, 1))
         ik_parent = cmds.listRelatives(ik, p=True)
-        mirrored_ik_parent = ik_parent[0].replace('l_', 'r_', 1)
-        cmds.parent(mirrored_ik_name, mirrored_ik_parent)
+        mir_ik_parent = ik_parent[0].replace(src, mir, 1)
+        cmds.parent(mir_ik_name, mir_ik_parent)
 
-        print(f"- {ik.replace('l_', 'r_', 1)}")
-        print(f"    - Start Joint: {mirrored_connection_dict['startJoint']}")
-        print(f"    - End Joint: {mirrored_connection_dict['endEffector']}")
-        print(f"    - IK Solver: {mirrored_connection_dict['ikSolver']}")
+        print(f"- {ik.replace(src, mir, 1)}")
+        print(f"    - Start Joint: {mir_connection_dict['startJoint']}")
+        print(f"    - End Joint: {mir_connection_dict['endEffector']}")
+        print(f"    - IK Solver: {mir_connection_dict['ikSolver']}")
 
 
 # mirror_ik_handles()
