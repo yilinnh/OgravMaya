@@ -1,22 +1,32 @@
 import maya.cmds as cmds
 import importlib
-AutoMirror = importlib.import_module('OgravMaya.rigging.AutoMirror')
-src = getattr(AutoMirror, 'src') 
-mir = getattr(AutoMirror, 'mir')
 
-def mirror_constraints():
+AutoMirror = importlib.import_module('OgravMaya.rigging.AutoMirror')
+# importlib.reload(AutoMirror)
+
+all_attrs = AutoMirror.get_attrs()
+src = all_attrs['src']
+mir = all_attrs['mir']
+ctrl_grp_suffix = all_attrs['ctrl_grp_suffix']
+mirror_axis = all_attrs['mirror_axis']
+
+def main():
 
     print("\n--------------------------------------------------")
     print("# CONSTRAINT")
     print("--------------------------------------------------")
 
-    all_constraints = [i for i in cmds.ls(type='constraint') if i.startswith(src)]
     axes = {'X', 'Y', 'Z'}
+
+    all_src_constraints = [i for i in cmds.ls(type='constraint') if i.startswith(src)]
+
+    all_mir_constraints = [i.replace(src, mir, 1) for i in all_src_constraints]
+    update_existing_mirrored_constraints(all_mir_constraints)
 
     def replace_prefix(item):
         return item.replace(src, mir, 1)
 
-    for constr in all_constraints:
+    for constr in all_src_constraints:
         # constraint_type = constr.split('_')[-1][0:-1] # e.g. l_cube_parentConstraint1
         constraint_type = cmds.objectType(constr)
 
@@ -178,4 +188,12 @@ def mirror_constraints():
             print(f"    - driven: {mir_driven}")
             print(f"    - skipped_rotate: {', '.join(skipped_rotate)}")
 
-# mirror_constraints()
+
+def update_existing_mirrored_constraints(items):
+    for i in items: 
+        if cmds.objExists(i):
+            cmds.delete(i)
+            print(f"Updated existing mirrored constraints: {i}")
+
+
+# main()

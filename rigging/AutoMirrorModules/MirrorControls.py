@@ -2,12 +2,15 @@ import maya.cmds as cmds
 import importlib
 ### reload will also run the imported module
 AutoMirror = importlib.import_module('OgravMaya.rigging.AutoMirror')
-src = getattr(AutoMirror, 'src') 
-mir = getattr(AutoMirror, 'mir')
-ctrl_grp_suffix = getattr(AutoMirror, 'ctrl_grp_suffix') 
-mirror_axis = getattr(AutoMirror, 'mirror_axis') 
+# importlib.reload(AutoMirror)
 
-def mirror_controls():
+all_attrs = AutoMirror.get_attrs()
+src = all_attrs['src']
+mir = all_attrs['mir']
+ctrl_grp_suffix = all_attrs['ctrl_grp_suffix']
+mirror_axis = all_attrs['mirror_axis']
+
+def main():
 
     print("\n--------------------------------------------------")
     print("# CONTROLS")
@@ -23,47 +26,40 @@ def mirror_controls():
 
     src_ctrl_grps = [i for i in all_objs if i.startswith(src) and ctrl_grp_suffix in i]
     src_root_ctrl_grps = [i for i in src_ctrl_grps if not cmds.listRelatives(i, p=True)[0].startswith(src)]
+    ### check if there's any unfrozen value
+    for i in src_root_ctrl_grps:
+        if not check_if_frozen(i):
+            print(f"At least one root control group has unfrozen transformation values: {i}")
+            cmds.select(i)
+            return
+
+    ### update and mirror root control grps
     mir_root_ctrl_grps = [i.replace(src, mir, 1) for i in src_root_ctrl_grps]
-
-    ### duplicate the grps to make sure the src_ctrl_descendants have ctrl root name in their relative paths
-    # tmp_root_ctrl_grps = cmds.duplicate(src_root_ctrl_grps, returnRootsOnly=True)
-    # ### Get all ctrls and reorder them based on the dag hierarchy
-    # src_ctrl_descendants = cmds.listRelatives(src_root_ctrl_grps, ad=True, path=True)
-    # src_ctrl_descendants = [i for i in src_ctrl_descendants if i.split('|')[-1].startswith(src)]
-    # ### this will only mirror the root ctrl name as it's at the first position in the path
-    # # mir_ctrl_descendants = [i.replace(src, mir, 1) for i in src_ctrl_descendants]
-
-    # cmds.delete(tmp_root_ctrl_grps)
+    update_existing_mirrored_controls(mir_root_ctrl_grps)
 
     for i in src_root_ctrl_grps:
         cmds.duplicate(i, n=i.replace(src, mir, 1))
 
-    # for i in mir_ctrl_descendants:
-    #     cmds.rename(i, i.split('|')[-1].replace(src, mir, 1))
-    mir_ctrl_list = []
+    ### get all mirrored ctrl paths
+    global all_mir_ctrls
+    all_mir_ctrls = []
+
     for i in [cmds.listRelatives(i, ad=True, fullPath=True) for i in mir_root_ctrl_grps]:
-        mir_ctrl_list.extend(i)
+        all_mir_ctrls.extend(i)
 
     ### rename all mirrored controls
-    mir_ctrl_list = [cmds.rename(i, i.split('|')[-1].replace(src, mir, 1)) for i in mir_ctrl_list]
+    all_mir_ctrls = [cmds.rename(i, i.split('|')[-1].replace(src, mir, 1)) for i in all_mir_ctrls]
 
     ### Find and delete redundant descendants
     redundant_descendants = []
-    for i in mir_ctrl_list:
+    for i in all_mir_ctrls:
         if cmds.objExists(i): ### Check if obj exist as in some cases the constraint could be deleted as descendant of ikHandle
             if cmds.objectType(i, isAType='constraint') or cmds.objectType(i, isAType='ikHandle'):
                 redundant_descendants.append(i)
                 cmds.delete(i)
                 # pass
 
-    mir_ctrl_list = list(set(mir_ctrl_list).difference(set(redundant_descendants)))
-
-
-
-    tmp_grp = cmds.group(n='tmp_grp', empty=True)
-    # mir_root_ctrl_grp_parent_dict = {cmds.listRelatives(i, p=True)[0]:i for i in mir_root_ctrl_grps}
-    greatest_descendants = cmds.listRelatives(mir_root_ctrl_grps, c=True)
-    mir_root_ctrl_grp_parent_dict = {i:cmds.listRelatives(i, p=True)[0] for i in greatest_descendants}
+    all_mir_ctrls = list(set(all_mir_ctrls).difference(set(redundant_descendants)))
 
     ### Mirror the root ctrl grp 
     if mirror_axis == 'x':
@@ -73,14 +69,8 @@ def mirror_controls():
     elif mirror_axis == 'z':
         cmds.scale(1, 1, -1, mir_root_ctrl_grps)
 
-    cmds.parent(greatest_descendants, tmp_grp)
+    [make_identity_individually(i) for i in mir_root_ctrl_grps]
 
-    cmds.makeIdentity(mir_root_ctrl_grps, apply=True, normal=0, preserveNormals=True)
-
-    for i in mir_root_ctrl_grp_parent_dict:
-        cmds.parent(i, mir_root_ctrl_grp_parent_dict[i])
-
-    cmds.delete(tmp_grp)
 
     all_dags = cmds.ls(dag=True, l=True)
     for i in mir_root_ctrl_grps:
@@ -94,5 +84,40 @@ def mirror_controls():
                 indent = (len(split_list) * 2 - 2) * ' '
                 print(f"{indent}- {d.split('|')[-1]}")
             
+    print(mirror_axis)
 
-mirror_controls()
+def update_existing_mirrored_controls(items):
+    for i in items: 
+        if cmds.objExists(i):
+            cmds.delete(i)
+            print(f"Updated existing mirrored root controls: {i}")
+
+
+def check_if_frozen(control_grp):
+    translation = cmds.getAttr(f"{control_grp}.translate")[0]
+    rotation = cmds.getAttr(f"{control_grp}.rotate")[0]
+    scale = cmds.getAttr(f"{control_grp}.scale")[0]
+    
+    all_transformation = translation + rotation + scale
+    frozen_transformation = (0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0)
+    
+    return all_transformation == frozen_transformation
+
+
+def make_identity_individually(item):
+    children = cmds.listRelatives(item, c=True)
+
+    if children:
+        cmds.parent(children, world=True)
+        cmds.makeIdentity(item, apply=True)
+        cmds.parent(children, item)
+    else:
+        cmds.makeIdentity(item, apply=True)
+
+
+def get_variables():
+    return {
+        'all_mir_ctrls': all_mir_ctrls
+    }
+
+# main()

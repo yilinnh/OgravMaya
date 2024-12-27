@@ -1,16 +1,26 @@
 import maya.cmds as cmds
 import importlib
+
 AutoMirror = importlib.import_module('OgravMaya.rigging.AutoMirror')
-### getattr will only get the variable, which won't run the module like using 'newvar = module.var' method
-src = getattr(AutoMirror, 'src') 
-mir = getattr(AutoMirror, 'mir')
-mirror_axis = getattr(AutoMirror, 'mirror_axis') 
+# importlib.reload(AutoMirror)
+
+all_attrs = AutoMirror.get_attrs()
+src = all_attrs['src']
+mir = all_attrs['mir']
+ctrl_grp_suffix = all_attrs['ctrl_grp_suffix']
+mirror_axis = all_attrs['mirror_axis']
+
+# AutoMirror = importlib.import_module('OgravMaya.rigging.AutoMirror')
+# # ### getattr will only get the variable, which won't run the module like using 'newvar = module.var' method
+# src = getattr(AutoMirror, 'src') 
+# mir = getattr(AutoMirror, 'mir')
+# mirror_axis = getattr(AutoMirror, 'mirror_axis') 
 
 # src = AutoMirror.src
 # mir = AutoMirror.mir
 # from AutoMirror import src, mir
 
-def mirror_joints():
+def main():
 
     print("\n--------------------------------------------------")
     print("# JOINT")
@@ -20,7 +30,9 @@ def mirror_joints():
     all_joints = cmds.ls(dag=True, type='joint')
     all_src_joints = [i for i in all_joints if i.startswith(src)]
     all_src_root_joints = [i for i in all_src_joints if not cmds.listRelatives(i, p=True)[0].startswith(src)]
-    # all_mir_joints = []
+
+    all_mir_root_joints = [i.replace(src, mir, 1) for i in all_src_root_joints]
+    update_existing_mirrored_joints(all_mir_root_joints)
 
     if mirror_axis == 'x':
         for i in all_src_root_joints:
@@ -57,7 +69,6 @@ def mirror_joints():
     ### Delete all redundant and invalid nodes under right side joints
     # all_mir_root_joints = [i for i in all_mir_joints if not cmds.listRelatives(i, p=True)[0].startswith(mir)]
 
-    all_mir_root_joints = [i.replace(src, mir, 1) for i in all_src_root_joints]
     # all_mir_joints = []
     all_joints = cmds.ls(dag=True, type='joint', l=True)
 
@@ -114,5 +125,11 @@ def is_joint_oriented_to_world(joint_name):
     return is_x_aligned and is_y_aligned and is_z_aligned
 
 
+def update_existing_mirrored_joints(items):
+    for i in items: 
+        if cmds.objExists(i):
+            cmds.delete(i)
+            print(f"Updated existing mirrored root joint: {i}")
 
-# mirror_joints()
+
+# main()

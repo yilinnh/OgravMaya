@@ -1,10 +1,16 @@
 import maya.cmds as cmds
 import importlib
-AutoMirror = importlib.import_module('OgravMaya.rigging.AutoMirror')
-src = getattr(AutoMirror, 'src') 
-mir = getattr(AutoMirror, 'mir')
 
-def mirror_node_connections():
+AutoMirror = importlib.import_module('OgravMaya.rigging.AutoMirror')
+# importlib.reload(AutoMirror)
+
+all_attrs = AutoMirror.get_attrs()
+src = all_attrs['src']
+mir = all_attrs['mir']
+ctrl_grp_suffix = all_attrs['ctrl_grp_suffix']
+mirror_axis = all_attrs['mirror_axis']
+
+def main():
     
     def mirror_connection_node_and_attr_name(ori_list, mir_list):
         for a,b in ori_list:
@@ -54,29 +60,21 @@ def mirror_node_connections():
 
 
         ### get all utility nodes that need to be mirrored
-        ori_node_list = []
+        all_ori_nodes = []
         for t in utility_node_types:
             nodes = cmds.ls(type=f'{t}')
-            # if nodes:
-            #     for n in nodes:
-            #         if n.startswith(src):
-            #             ori_node_list.append(n)
-            ori_node_list.extend([n for n in nodes if n.startswith(src)])
+            all_ori_nodes.extend([n for n in nodes if n.startswith(src)])
 
-        # ori_node_dict = {}
-        # for t in utility_node_types:
-        #     nodes = cmds.ls(type=f'{t}')
-        #     if nodes:
-        #         for n in nodes:
-        #             if n.startswith(src):
-        #                 ori_node_dict[n] = t
+        global all_mir_nodes
+        all_mir_nodes = [i.replace(src, mir, 1) for i in all_ori_nodes]
+        update_existing_mirrored_nodes(all_mir_nodes)
 
-        ### assign the mirror node dict and get original node connections
+         ### assign the mirror node dict and get original node connections
         ori_sour_connections, ori_dest_connections = [], []
         # mir_node_dict = {}
 
         # for i in ori_node_dict:
-        for i in ori_node_list:
+        for i in all_ori_nodes:
             ### source list: input <- output
             ### destination list: output -> input
             ori_sour_connections += cmds.listConnections(i, s=True, d=False, c=True, p=True, scn=True) or []
@@ -95,21 +93,6 @@ def mirror_node_connections():
         exclude_connections(ori_sour_connections, exclude_sour_connections)
         exclude_connections(ori_dest_connections, exclude_dest_connections)
 
-        # for i in ori_sour_connections:
-        #     if not i[0].split('.')[0].startswith(src) or not i[1].split('.')[0].startswith(src):
-        #          exclude_sour_connections.append(i)
-
-        # for i in ori_dest_connections:
-        #     if not i[0].split('.')[0].startswith(src) or not i[1].split('.')[0].startswith(src):
-        #          exclude_dest_connections.append(i)
-
-        # for i in range(0, len(ori_sour_connections), 2):
-        #     if not ori_sour_connections[i].split('.')[0].startswith(src) or not ori_sour_connections[i+1].split('.')[0].startswith(src):
-        #         exclude_sour_connections += ori_sour_connections[i], ori_sour_connections[i+1]
-
-        # for i in range(0, len(ori_dest_connections), 2):
-        #     if not ori_dest_connections[i].split('.')[0].startswith(src) or not ori_dest_connections[i+1].split('.')[0].startswith(src):
-        #         exclude_dest_connections += ori_dest_connections[i], ori_dest_connections[i+1]
 
         ori_sour_connections = [i for i in ori_sour_connections if i not in exclude_sour_connections]
         ori_dest_connections = [i for i in ori_dest_connections if i not in exclude_dest_connections]
@@ -125,7 +108,7 @@ def mirror_node_connections():
 
         ### get mirrored nodes name ready and duplicate original nodes
         mir_node_dict = {}
-        for i in ori_node_list:
+        for i in all_ori_nodes:
             mir_node_dict[i] = cmds.duplicate(i, n='tmp_mir_utility_node')[0]
         
         renamed_mir_node_dict = {}
@@ -134,20 +117,19 @@ def mirror_node_connections():
         
         ### connect node attributes
         for i in mir_sour_connections:
-            cmds.connectAttr(i[1], i[0], f=True)
-            print(f'- {i[1]} -> {i[0]}')
+            if cmds.isConnected(i[1], i[0]):
+                continue
+            else:
+                cmds.connectAttr(i[1], i[0], f=True)
+                print(f'- {i[1]} -> {i[0]}')
 
         for i in mir_dest_connections:
-            cmds.connectAttr(i[0], i[1], f=True)
-            print(f'- {i[0]} -> {i[1]}')
+            if cmds.isConnected(i[0], i[1]):
+                continue
+            else:
+                cmds.connectAttr(i[0], i[1], f=True)
+                print(f'- {i[0]} -> {i[1]}')
 
-        # for i in range(0, len(mir_sour_connections), 2):
-        #     cmds.connectAttr(mir_sour_connections[i+1], mir_sour_connections[i], f=True)
-        #     print(f'- {mir_sour_connections[i+1]} -> {mir_sour_connections[i]}')
-
-        # for i in range(0, len(mir_dest_connections), 2):
-        #     cmds.connectAttr(mir_dest_connections[i], mir_dest_connections[i+1], f=True)
-        #     print(f'- {mir_dest_connections[i]} -> {mir_dest_connections[i+1]}')
 
 
     def mirror_contorl_attr_connections():
@@ -194,16 +176,34 @@ def mirror_node_connections():
         
         
         for i in mir_sour_connections:
-            cmds.connectAttr(i[1], i[0], f=True)
-            print(f'- {i[1]} -> {i[0]}')
+            if cmds.isConnected(i[1], i[0]):
+                continue
+            else:
+                cmds.connectAttr(i[1], i[0], f=True)
+                print(f'- {i[1]} -> {i[0]}')
 
         for i in mir_dest_connections:
-            cmds.connectAttr(i[0], i[1], f=True)
-            print(f'- {i[0]} -> {i[1]}')
+            if cmds.isConnected(i[0], i[1]):
+                continue
+            else:
+                cmds.connectAttr(i[0], i[1], f=True)
+                print(f'- {i[0]} -> {i[1]}')
 
 
     mirror_utility_node_connections()
     mirror_contorl_attr_connections()
 
 
-# mirror_node_connections()
+def update_existing_mirrored_nodes(items):
+    for i in items: 
+        if cmds.objExists(i):
+            cmds.delete(i)
+            print(f"Updated existing mirrored nodes: {i}")
+
+
+def get_variables():
+    return {
+        'all_mir_nodes': all_mir_nodes
+    }
+
+# main()

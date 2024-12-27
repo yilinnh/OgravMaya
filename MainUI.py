@@ -10,6 +10,7 @@ def main():
     create_selection_counter()
     arrange_layout()
 
+
 class Layout:
     def __init__(self, type):
         self.type = type
@@ -47,7 +48,7 @@ def create_ui():
     win_h = 300
     if cmds.window(win, exists=True):
         cmds.deleteUI(win)
-    cmds.window(win, t=nice_script_name(win), wh=(win_w, win_h), sizeable=0, mnb=0, mxb=0, closeCommand=cleanup_callback, nestedDockingEnabled=True)
+    cmds.window(win, t=nice_script_name(win), wh=(win_w, win_h), sizeable=0, mnb=0, mxb=0, closeCommand=cleanup_callback)
     cmds.showWindow(win)
     print(f"{nice_win_name} loaded")
 
