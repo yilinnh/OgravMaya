@@ -7,18 +7,9 @@ AutoMirror = importlib.import_module('OgravMaya.rigging.AutoMirror')
 all_attrs = AutoMirror.get_attrs()
 src = all_attrs['src']
 mir = all_attrs['mir']
-ctrl_grp_suffix = all_attrs['ctrl_grp_suffix']
+ctrl_suffix = all_attrs['ctrl_suffix']
 mirror_axis = all_attrs['mirror_axis']
-
-# AutoMirror = importlib.import_module('OgravMaya.rigging.AutoMirror')
-# # ### getattr will only get the variable, which won't run the module like using 'newvar = module.var' method
-# src = getattr(AutoMirror, 'src') 
-# mir = getattr(AutoMirror, 'mir')
-# mirror_axis = getattr(AutoMirror, 'mirror_axis') 
-
-# src = AutoMirror.src
-# mir = AutoMirror.mir
-# from AutoMirror import src, mir
+ofst_suffix = 'ofst'
 
 def main():
 
@@ -29,79 +20,178 @@ def main():
     ### Get all left root joint to mirror
     all_joints = cmds.ls(dag=True, type='joint')
     all_src_joints = [i for i in all_joints if i.startswith(src)]
-    all_src_root_joints = [i for i in all_src_joints if not cmds.listRelatives(i, p=True)[0].startswith(src)]
+    if not all_src_joints:
+        print("No source joints found")
+        return
 
+    # all_src_root_joints = [i for i in all_src_joints if not cmds.listRelatives(i, p=True)[0].startswith(src) or not cmds.listRelatives(i, p=True, type='joint')]
+    # all_src_root_joints = [i for i in all_src_joints if not cmds.listRelatives(i, p=True)[0].startswith(src)]
+    # all_src_root_joints = [i for i in all_src_joints if cmds.listRelatives(i, p=True)[0].startswith(src) and not cmds.listRelatives(i)]
+    all_src_root_joints = []
+    for i in all_src_joints:
+        parent = cmds.listRelatives(i, p=True)[0]
+        if cmds.objectType(parent, isType='joint') and not parent.startswith(src):
+            all_src_root_joints.append(i)
+        elif cmds.objectType(parent, isType='transform') and parent.startswith(src):
+            # if not parent.endswith(ofst_suffix):
+            all_src_root_joints.append(i)
+
+    ### exclude the duplicates
+    # all_src_root_joints = [i for i in set(all_src_root_joints) if i in all_src_root_joints]
+    print(f'All src root joints: {all_src_root_joints}\n')
+
+    # all_mir_joints_new_name = [i.replace(src, mir, 1) for i in all_src_joints]
     all_mir_root_joints = [i.replace(src, mir, 1) for i in all_src_root_joints]
     update_existing_mirrored_joints(all_mir_root_joints)
 
+    all_mir_joints = []
+
     if mirror_axis == 'x':
         for i in all_src_root_joints:
+            # mir_joint_list = cmds.mirrorJoint(i, mirrorBehavior=True, mirrorYZ=True)
             mir_joint_list = cmds.mirrorJoint(i, mirrorBehavior=True, mirrorYZ=True)
-            [cmds.rename(j, j.replace(src, mir, 1)[:-1]) for j in mir_joint_list if cmds.objectType(j, isType='joint')]
-
-            # for j in mir_joint_list:
-            #     if cmds.objectType(j, isType='joint'): ### e.g. it might include constraints
-            #         mir_joint = cmds.rename(j, j.replace(src, mir, 1)[:-1])
-            #         # all_mir_joints.append(mir_joint)
+            all_mir_joints.extend(mir_joint_list)
 
     elif mirror_axis == 'y':
         for i in all_src_root_joints:
             mir_joint_list = cmds.mirrorJoint(i, mirrorBehavior=True, mirrorXZ=True)
-            [cmds.rename(j, j.replace(src, mir, 1)[:-1]) for j in mir_joint_list if cmds.objectType(j, isType='joint')]
+            all_mir_joints.extend(mir_joint_list)
 
     elif mirror_axis == 'z':
         for i in all_src_root_joints:
             mir_joint_list = cmds.mirrorJoint(i, mirrorBehavior=True, mirrorXY=True)
-            [cmds.rename(j, j.replace(src, mir, 1)[:-1]) for j in mir_joint_list if cmds.objectType(j, isType='joint')]
+            all_mir_joints.extend(mir_joint_list)
 
 
+    ### reorder all mir joints and rename them
+    all_joints = cmds.ls(dag=True, type='joint')
+    # all_src_joints = [i for i in all_joints if i in all_src_joints]
+    # all_mir_joints = [i for i in all_joints if i not in all_src_joints and i.startswith(src)]
+    all_mir_joints = [i for i in all_mir_joints if cmds.objectType(i, isType='joint')]
+    # all_mir_joints = [i for i in all_joints if i in all_mir_joints]
 
-    # all_joints = cmds.ls(dag=True, type='joint')
-    # all_mir_joints = [i for i in all_joints if i.startswith(mir)]
+    all_mir_joints_new_name = [i.replace(src, mir, 1) for i in all_src_joints]
 
-    # for i in all_mir_joints:
-        # cmds.rename(i, i.replace(src, mir, 1)) 
-    # all_mir_joints = [i.replace(src, mir, 1)) for i in all_mir_joints]
+    # for a,b,c in zip(all_src_joints, all_mir_joints, all_mir_joints_new_name):
+        # print(f'{a} -> {b} - {c}')
 
-    # all_mir_joints = [cmds.rename(i, i.replace(src, mir, 1)) for i in all_mir_joints]
-    # all_mir_joints = [cmds.rename(i, i[:-1]) for i in all_mir_joints if i.endswith('1')]
+    # print("\nRenamed mirrored joints:")
+    for i,n in zip(all_mir_joints, all_mir_joints_new_name):
+        print(f'{i} -> {n}')
+        cmds.rename(i, n)
 
-    ### Delete all redundant and invalid nodes under right side joints
-    # all_mir_root_joints = [i for i in all_mir_joints if not cmds.listRelatives(i, p=True)[0].startswith(mir)]
+    all_mir_joints = all_mir_joints_new_name
 
-    # all_mir_joints = []
+    ## Delete all redundant and invalid nodes under right side joints
+    all_mir_root_joints = [i for i in all_mir_joints if not cmds.listRelatives(i, p=True)[0].startswith(mir)]
+
     all_joints = cmds.ls(dag=True, type='joint', l=True)
 
+    print("Mirrored joints hierarchy:")
     for i in all_mir_root_joints:
         ad = cmds.listRelatives(i, ad=True)
         if ad:
-            [cmds.delete(d) for d in ad if not cmds.objectType(d, isType='joint')]
+            [cmds.delete(d) for d in ad if cmds.objectType(d, isAType='constraint') or cmds.objectType(d, isAType='ikHandle') or cmds.objectType(d, isAType = 'ikEffector')]
+            [cmds.rename(d, d.replace(src, mir, 1)[:-1]) for d in ad if d.endswith(f'{ofst_suffix}1')]
+
 
         all_joint_descendants = cmds.listRelatives(i, ad=True, fullPath=True)
 
-        # all_mir_joints.append(i)
-        # if all_joint_descendants:
-        #     all_mir_joints.extend(all_joint_descendants)
-
         print(f'- {i}')
+        root_joint_name = i.split('|')[-1]
 
         if all_joint_descendants:
             all_joint_descendants = [i for i in all_joints if i in all_joint_descendants]
 
             for d in all_joint_descendants:
                 split_list = d.split('|')
-                split_list = split_list[split_list.index(i.split('|')[-1]):]
+                split_list = split_list[split_list.index(root_joint_name):]
                 print(f"{(len(split_list) * 2 - 2) * ' '}- {split_list[-1]}")
             
 
     ### reorient the joints that should orient to the world
-    world_oriented_src_joints = [i for i in all_src_joints if is_joint_oriented_to_world(i)]
-    world_oriented_mir_joints = [i.replace(src, mir, 1) for i in world_oriented_src_joints]
+    # world_oriented_src_joints = [i for i in all_src_joints if is_joint_oriented_to_world(i)]
+    # world_oriented_mir_joints = [i.replace(src, mir, 1) for i in world_oriented_src_joints]
 
-    [cmds.joint(i, e=True, oj='none') for i in world_oriented_mir_joints]
+    # [cmds.joint(i, e=True, oj='none') for i in world_oriented_mir_joints]
+    # for i in world_oriented_mir_joints:
+    #     parent = cmds.listRelatives(i, p=True)
+    #     if parent:
+    #         cmds.parent(i, world=True)
+    #         cmds.joint(i, e=True, oj='none')
+    #         cmds.parent(i, parent)
+    #     else:
+    #         cmds.joint(i, e=True, oj='none')
 
-    print(f"\nWorld oriented joints:")
-    [print(f"- {i}") for i in world_oriented_mir_joints]
+
+
+    def parent_to_mir_group(root):
+        src_parent_dict = {}
+        for i in root:
+            # p = cmds.listRelatives(i, p=True, type='transform')[0]
+            p = cmds.listRelatives(i, p=True)[0]
+            if p.startswith(src) and cmds.objectType(p, isType='transform'):
+                src_parent_dict[i] = p
+                ### duplicate from src to mir groups
+                mir_p_grp = p.replace(src, mir, 1)
+                if not cmds.objExists(mir_p_grp):
+                    mir_p_grp = cmds.duplicate(p, n=mir_p_grp, parentOnly=True)[0]
+                    mir_p_grp_parent = cmds.listRelatives(mir_p_grp, p=True)[0]
+
+                    tmp_grp = cmds.group(empty=True)
+                    cmds.parent(mir_p_grp, tmp_grp)
+                    
+                    if mirror_axis == 'x':
+                        cmds.scale(-1, 1, 1, tmp_grp)
+                    elif mirror_axis == 'y':
+                        cmds.scale(1, -1, 1, tmp_grp)
+                    elif mirror_axis == 'z':
+                        cmds.scale(1, 1, -1, tmp_grp)
+                    
+                    cmds.makeIdentity(tmp_grp, apply=True, s=True)
+
+                    cmds.parent(mir_p_grp, mir_p_grp_parent)
+                    cmds.delete(tmp_grp)
+
+                    # if cmds.getAttr(f'{p}.offsetParentMatrix') == init_ofst_parent_matrix:
+                    #     continue
+                    # else:
+                    #     bake_to_offset_parent_matrix(mir_p_grp)
+
+                else:
+                    continue
+            else:
+                continue
+
+
+        if  src_parent_dict:
+            mir_parent_dict = {c.replace(src, mir, 1):p.replace(src, mir, 1) for c,p in src_parent_dict.items()}
+            [cmds.parent(c, p) for c,p in mir_parent_dict.items() if cmds.listRelatives(c, p=True)[0] != p]
+
+        return src_parent_dict
+
+    src_joint_parent_dict = parent_to_mir_group(all_src_root_joints)
+    nested_src_joint_parent_dict = parent_to_mir_group(src_joint_parent_dict.values())
+
+
+
+    # print(f"\nWorld oriented joints:")
+    # [print(f"- {i}") for i in world_oriented_mir_joints]
+
+    ### prevent scale the joints in letter process 
+    cmds.select(cl=True)
+
+
+def make_identity_individually(item):
+    children = cmds.listRelatives(item, c=True)
+
+    if children:
+        cmds.parent(children, world=True)
+        cmds.makeIdentity(item, apply=True)
+        cmds.parent(children, item)
+    else:
+        cmds.makeIdentity(item, apply=True)
+
 
 def is_joint_oriented_to_world(joint_name):
     """
@@ -123,6 +213,22 @@ def is_joint_oriented_to_world(joint_name):
 
     # Return True if all axes align with world axes
     return is_x_aligned and is_y_aligned and is_z_aligned
+
+
+def bake_to_offset_parent_matrix(obj):
+    if not cmds.objExists(obj):
+        raise ValueError(f"Object '{obj}' does not exist.")
+
+    # Get the object's current world matrix
+    world_matrix = cmds.xform(obj, q=True, matrix=True, ws=True)
+    print(world_matrix)
+    # Apply the current world matrix to the offsetParentMatrix
+    cmds.setAttr(f"{obj}.offsetParentMatrix", world_matrix, type="matrix")
+
+    # Reset local transformations
+    cmds.setAttr(f"{obj}.translate", 0, 0, 0)
+    cmds.setAttr(f"{obj}.rotate", 0, 0, 0)
+    cmds.setAttr(f"{obj}.scale", 1, 1, 1)
 
 
 def update_existing_mirrored_joints(items):

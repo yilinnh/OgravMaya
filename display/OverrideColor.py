@@ -57,9 +57,9 @@ def create_ui():
     ColorCanvas((0.0,0.4,1)) # dark blue
     # ColorCanvas((0.0,0.0,1)) # dark blue
     ColorCanvas((0,0.6,1)) # light blue
-    ColorCanvas((0.3,0.6,0.9)) # blue
-    ColorCanvas((0.6,0.6,0.8))
-    ColorCanvas((0.5,0.5,1)) 
+    ColorCanvas((0.8,0.8,1)) # white
+    ColorCanvas((0.6,0.65,0.8))
+    ColorCanvas((0.6,0.5,1)) 
     ColorCanvas((0.4,0.2,1)) # purple
     ColorCanvas((0.8,0.1,1)) # purple
     # ColorCanvas((0.0,0.1,0.0))

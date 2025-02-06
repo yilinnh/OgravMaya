@@ -1,7 +1,7 @@
 import maya.cmds as cmds
 
 def main():
-    cmds.window('newOutliner')
+    cmds.window(wh=[300,500])
     cmds.frameLayout( labelVisible=False )
     panel = cmds.outlinerPanel()
     outliner = cmds.outlinerPanel(panel, query=True,outlinerEditor=True)

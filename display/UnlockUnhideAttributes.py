@@ -5,8 +5,9 @@ def main():
     if not sel:
         print("No objects selected")
     all_shapes = cmds.ls(shapes=True)
-    for i in all_shapes:
-        sel.remove(i)
+    sel = list(set(sel).difference(set(all_shapes)))
+    # for i in all_shapes:
+    #     sel.remove(i)
     # sel = [i for i in sel if i not in all_shapes]
     
     for i in sel:

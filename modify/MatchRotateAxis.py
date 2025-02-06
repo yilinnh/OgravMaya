@@ -19,14 +19,18 @@ def main():
     proxy = cmds.group(n='proxy',empty=True) 
 
     for i in source:
-        cmds.matchTransform(proxy, target[source.index(i)])
-        sel_parent = cmds.listRelatives(i, p=True)
+        cmds.matchTransform(proxy, i, pos=True, scl=True)
+        cmds.makeIdentity(proxy, apply=True)
+        cmds.matchTransform(proxy, target[source.index(i)], rot=True)
 
+        sel_parent = cmds.listRelatives(i, p=True)
         cmds.parent(i, proxy)
-        cmds.makeIdentity(i, apply=True)
+        cmds.makeIdentity(i, apply=True, r=True, t=False, s=False)
 
         if sel_parent:
             cmds.parent(i, sel_parent)
+        else:
+            cmds.parent(i, world=True)
 
     cmds.delete(proxy)
 

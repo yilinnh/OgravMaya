@@ -113,6 +113,11 @@ def handle_text_change(*args):
         # this will return the full path name
         matched_names = [i for i in all_objs if re.search(pattern, i)]
 
+        # if some of them is selected, then filter the match list to the selection
+        sel = cmds.ls(sl=True)
+        if sel:
+            matched_names = [i for i in matched_names if i in sel]
+
         cmds.textScrollList(match_list, e=True, ra=True)
         cmds.textScrollList(result_list, e=True, ra=True)
 
@@ -191,7 +196,8 @@ def handle_apply(*args):
         name_dict = {n:r for n,r in zip(matched_names, results)}
 
         # reverse the order to rename the objs from the lowest level to the top level, to prevent not able to find the obj after the fore path is renamed
-        name_dict = {key:value for key,value in reversed(name_dict.items())}
+        # name_dict = {key:value for key,value in reversed(name_dict.items())}
+        name_dict = {key:value for key,value in zip(reversed(list(name_dict.keys())), reversed(list(name_dict.values())))}
 
         for i in name_dict:
             cmds.rename(i, name_dict[i])

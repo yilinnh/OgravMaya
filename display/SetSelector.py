@@ -40,7 +40,7 @@ def create_ui():
     global win_w
     global win_h
     win_w = 300
-    win_h = 230
+    win_h = 250
     cmds.window(win, t='Set Selector', mxb=False, mnb=False, wh=(win_w,win_h), s=False, closeCommand=remove_callbacks)
     cmds.showWindow(win)
 
@@ -182,11 +182,14 @@ def update_member_items(*args):
                 if common_items:
                     # common_items = sorted(set(common_items))
                     append_items(member_list, common_title)
-                    cmds.textScrollList(member_list, e=True, enableItem=(common_title,False))
+                    # cmds.textScrollList(member_list, e=True, enableItem=(common_title,False)) ### enable is supported after 2024
+                    cmds.textScrollList(member_list, e=True)
 
-                    ordered_common_items = [i for i in all_dag_objs if i in common_items]
-                    cmds.textScrollList(member_list, e=True, removeItem=ordered_common_items)
-                    append_items(member_list, ordered_common_items)
+                    # ordered_common_items = [i for i in all_dag_objs if i in common_items]
+                    # cmds.textScrollList(member_list, e=True, removeItem=ordered_common_items)
+                    # append_items(member_list, ordered_common_items)
+                    cmds.textScrollList(member_list, e=True, removeItem=common_items)
+                    append_items(member_list, common_items)
 
 
 
@@ -374,7 +377,7 @@ def added_callback(node, clientData):
 
     def deferred_callback():
         global abort_added_callback
-        print("callback of added")
+        # print("callback of added")
         update_set_items() 
         # update_set_sel()
         select_previous_set_items()
@@ -394,7 +397,7 @@ def removed_callback(node, clientData):
 
     def deferred_callback():
         global abort_removed_callback
-        print("callback of removed")
+        # print("callback of removed")
         update_set_items()
         # update_set_sel()
         select_previous_set_items()
@@ -412,7 +415,7 @@ def undo_callback(clientData):
     abort_added_callback, abort_removed_callback = True, True
 
     def undo_callback_deferred():
-        print("callback of undo")
+        # print("callback of undo")
         update_set_items()
         # update_set_sel()
         select_previous_set_items()
@@ -433,7 +436,7 @@ def redo_callback(clientData):
     abort_added_callback, abort_removed_callback = True, True
 
     def redo_callback_deferred():
-        print("callback of redo")
+        # print("callback of redo")
         update_set_items()
         # update_set_sel()
         select_previous_set_items()
